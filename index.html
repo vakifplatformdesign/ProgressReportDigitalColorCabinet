@@ -58,6 +58,7 @@
     overflow: hidden;
     max-height: 220px;
     transition: max-height 0.4s ease;
+    white-space: pre-wrap;
   }
 
   .code-box.expanded {
@@ -108,7 +109,8 @@
 
   <div class="code-box" id="codeBox">
 <pre><code>
-# ===========================
+
+  # ===========================
 # Textile QC: Colab Edition — PDF-Only Upgrade
 # ===========================
 # - Upload two images when prompted (Reference & Test)
@@ -210,27 +212,27 @@ class QCSettings:
     """Quality Control Settings for textile analysis"""
     # Operator info
     operator_name: str = "Operator"
-    
+
     # Color thresholds
     delta_e_threshold: float = 2.0
     delta_e_conditional: float = 3.5
     lab_l_threshold: float = 1.0
     lab_ab_threshold: float = 1.0
     lab_overall_threshold: float = 2.0
-    
+
     # Pattern thresholds
     ssim_pass_threshold: float = 0.95
     ssim_conditional_threshold: float = 0.90
-    
+
     # Scoring parameters
     color_score_multiplier: float = 20.0
     uniformity_std_multiplier: float = 10.0
-    
+
     # Quality decision thresholds
     color_score_threshold: float = 70.0
     pattern_score_threshold: float = 90.0
     overall_score_threshold: float = 70.0
-    
+
     # Region selection
     use_crop: bool = False
     crop_shape: str = "circle"  # "circle" or "rectangle"
@@ -239,57 +241,57 @@ class QCSettings:
     crop_diameter: int = 500  # For circle
     crop_width: int = 500  # For rectangle
     crop_height: int = 500  # For rectangle
-    
+
     # Number of sample points
     num_sample_points: int = 5
-    
+
     # ===== ADVANCED TEXTURE/PATTERN PARAMETERS =====
     # FFT parameters
     fft_enable_notch: bool = False
     fft_num_peaks: int = 5
-    
+
     # Gabor parameters
     gabor_frequencies: list = field(default_factory=lambda: [0.1, 0.2, 0.3])
     gabor_frequencies_str: str = "0.1, 0.2, 0.3"  # UI input
     gabor_num_orientations: int = 8
-    
+
     # GLCM parameters
     glcm_distances: list = field(default_factory=lambda: [1, 3, 5])
     glcm_distances_str: str = "1, 3, 5"  # UI input
     glcm_angles: list = field(default_factory=lambda: [0, 45, 90, 135])
     glcm_angles_str: str = "0, 45, 90, 135"  # UI input
-    
+
     # LBP parameters
     lbp_points: int = 24
     lbp_radius: int = 3
-    
+
     # Wavelet parameters
     wavelet_type: str = 'db4'
     wavelet_levels: int = 3
-    
+
     # Defect detection parameters
     defect_min_area: int = 50
     saliency_strength: float = 1.0
     morph_kernel_size: int = 5
-    
+
     # ===== COLOR/SPECTROPHOTOMETER PARAMETERS =====
     # Observer angle
     observer_angle: str = "2"  # "2" or "10" degrees
-    
+
     # Geometry mode
     geometry_mode: str = "d/8 SCI"  # "d/8 SCI", "d/8 SCE", "45/0"
-    
+
     # Color difference methods
     use_delta_e_cmc: bool = True
     cmc_l_c_ratio: str = "2:1"  # "2:1" or "1:1"
-    
+
     # Whiteness/Yellowness thresholds
     whiteness_min: float = 40.0
     yellowness_max: float = 10.0
-    
+
     # Metamerism illuminants
     metamerism_illuminants: list = field(default_factory=lambda: ["D65", "D50", "TL84", "A", "F2", "CWF"])
-    
+
     # Spectral data
     spectral_ref_path: str = ""
     spectral_sample_path: str = ""
@@ -298,17 +300,17 @@ class QCSettings:
     spectral_ref_reflectance: np.ndarray = field(default_factory=lambda: np.array([]))
     spectral_sample_wavelengths: np.ndarray = field(default_factory=lambda: np.array([]))
     spectral_sample_reflectance: np.ndarray = field(default_factory=lambda: np.array([]))
-    
+
     # UV control (note only)
     uv_control_note: str = "UV control not available for RGB images"
-    
+
     # ===== REPORT SECTIONS CONTROL =====
     # Main sections
     enable_analysis_settings: bool = False  # Disabled by default, can be enabled by user
     enable_color_unit: bool = True
     enable_pattern_unit: bool = True
     enable_spectrophotometer: bool = True
-    
+
     # Color Unit sub-sections
     enable_color_input_images: bool = True
     enable_color_measurements: bool = True
@@ -321,14 +323,14 @@ class QCSettings:
     enable_color_quality_assessment: bool = True
     enable_color_scoring: bool = True
     enable_color_recommendations: bool = True
-    
+
     # Pattern Unit sub-sections
     enable_pattern_ssim: bool = True
     enable_pattern_symmetry: bool = True
     enable_pattern_edge: bool = True
     enable_pattern_repeat: bool = True
     enable_pattern_advanced: bool = True
-    
+
     # Spectrophotometer sub-sections
     enable_spectro_config: bool = True
     enable_spectro_color_diff_methods: bool = True
@@ -535,7 +537,7 @@ def deltaE_CMC(lab1, lab2, l=2, c=1):
     """CMC l:c color difference (typically l:c = 2:1 or 1:1)"""
     L1, a1, b1 = lab1[...,0], lab1[...,1], lab1[...,2]
     L2, a2, b2 = lab2[...,0], lab2[...,1], lab2[...,2]
-    
+
     dL = L1 - L2
     C1 = np.sqrt(a1**2 + b1**2)
     C2 = np.sqrt(a2**2 + b2**2)
@@ -544,45 +546,45 @@ def deltaE_CMC(lab1, lab2, l=2, c=1):
     db = b1 - b2
     dH_sq = da**2 + db**2 - dC**2
     dH_sq = np.maximum(dH_sq, 0)  # Avoid negative due to numerical errors
-    
+
     H1 = np.degrees(np.arctan2(b1, a1))
     H1 = np.where(H1 < 0, H1 + 360, H1)
-    
+
     # Weighting functions
     F = np.sqrt(C1**4 / (C1**4 + 1900))
-    T = np.where((H1 >= 164) & (H1 <= 345), 
+    T = np.where((H1 >= 164) & (H1 <= 345),
                  0.56 + np.abs(0.2 * np.cos(np.radians(H1 + 168))),
                  0.36 + np.abs(0.4 * np.cos(np.radians(H1 + 35))))
-    
+
     SL = np.where(L1 < 16, 0.511, (0.040975 * L1) / (1 + 0.01765 * L1))
     SC = ((0.0638 * C1) / (1 + 0.0131 * C1)) + 0.638
     SH = SC * (F * T + 1 - F)
-    
+
     return np.sqrt((dL/(l*SL))**2 + (dC/(c*SC))**2 + (dH_sq/(SH**2)))
 
 def cie_whiteness_tint(xyz, illuminant='D65'):
     """CIE Whiteness and Tint (ISO 11475) for illuminant D65 with 10° observer"""
     # For D65/10°, use Y, Z directly
     X, Y, Z = xyz[...,0], xyz[...,1], xyz[...,2]
-    
+
     # CIE Whiteness (D65, 10°)
     W = Y + 800*(0.3138 - X/np.maximum(X + Y + Z, 1e-8)) + 1700*(0.3310 - Y/np.maximum(X + Y + Z, 1e-8))
-    
+
     # Tint
     T = 900*(0.3138 - X/np.maximum(X + Y + Z, 1e-8)) - 650*(0.3310 - Y/np.maximum(X + Y + Z, 1e-8))
-    
+
     return W, T
 
 def astm_e313_yellowness(xyz):
     """ASTM E313 Yellowness Index"""
     X, Y, Z = xyz[...,0], xyz[...,1], xyz[...,2]
-    
+
     # Coefficients for D65/10° (newer standard)
     C_x = 1.3013
     C_z = 1.1498
-    
+
     YI = 100 * (C_x * X - C_z * Z) / np.maximum(Y, 1e-8)
-    
+
     return YI
 
 # ----------------------------
@@ -595,7 +597,7 @@ def parse_spectral_csv(csv_path):
         # Try common column name variations
         wl_cols = [c for c in df.columns if 'wave' in c.lower() or 'nm' in c.lower() or 'λ' in c.lower()]
         ref_cols = [c for c in df.columns if 'ref' in c.lower() or 'r(' in c.lower() or '%' in c.lower()]
-        
+
         if not wl_cols or not ref_cols:
             # Assume first two columns
             wavelengths = df.iloc[:, 0].values
@@ -603,7 +605,7 @@ def parse_spectral_csv(csv_path):
         else:
             wavelengths = df[wl_cols[0]].values
             reflectance = df[ref_cols[0]].values
-        
+
         # Filter to 380-700nm range
         mask = (wavelengths >= 380) & (wavelengths <= 700)
         return wavelengths[mask], reflectance[mask]
@@ -615,34 +617,34 @@ def spectral_to_xyz(wavelengths, reflectance, illuminant='D65', observer='2'):
     """Compute XYZ tristimulus values from spectral reflectance"""
     # Interpolate spectral data to match CIE wavelengths (380-780nm, 5nm step)
     cie_wl = CIE_2DEG_WAVELENGTHS
-    
+
     # Interpolate reflectance to CIE wavelengths
     reflectance_interp = np.interp(cie_wl, wavelengths, reflectance)
-    
+
     # Get CMF
     x_bar = CIE_2DEG_CMF['x_bar']
     y_bar = CIE_2DEG_CMF['y_bar']
     z_bar = CIE_2DEG_CMF['z_bar']
-    
+
     # Get illuminant SPD (using D65 as default, others can be added)
     spd = D65_SPD
-    
+
     # Compute tristimulus values: X = k * Σ R(λ) * x̄(λ) * S(λ) * Δλ
     delta_lambda = 5  # 5nm step
-    
+
     X = np.sum(reflectance_interp * x_bar * spd) * delta_lambda
     Y = np.sum(reflectance_interp * y_bar * spd) * delta_lambda
     Z = np.sum(reflectance_interp * z_bar * spd) * delta_lambda
-    
+
     # Normalize to Y=100 for perfect white
     k = 100.0 / np.sum(y_bar * spd * delta_lambda)
-    
+
     return np.array([X * k, Y * k, Z * k])
 
 def find_spectral_peaks_valleys(wavelengths, reflectance, n_peaks=3):
     """Find peaks and valleys in spectral reflectance curve"""
     from scipy.signal import find_peaks
-    
+
     # Find peaks
     peaks_idx, _ = find_peaks(reflectance, prominence=2)
     if len(peaks_idx) > 0:
@@ -651,7 +653,7 @@ def find_spectral_peaks_valleys(wavelengths, reflectance, n_peaks=3):
         sorted_peaks = peaks_idx[np.argsort(peak_heights)[::-1]][:n_peaks]
     else:
         sorted_peaks = []
-    
+
     # Find valleys (invert signal)
     valleys_idx, _ = find_peaks(-reflectance, prominence=2)
     if len(valleys_idx) > 0:
@@ -659,7 +661,7 @@ def find_spectral_peaks_valleys(wavelengths, reflectance, n_peaks=3):
         sorted_valleys = valleys_idx[np.argsort(valley_depths)][:n_peaks]
     else:
         sorted_valleys = []
-    
+
     results = []
     for idx in sorted_peaks:
         results.append({
@@ -667,14 +669,14 @@ def find_spectral_peaks_valleys(wavelengths, reflectance, n_peaks=3):
             'wavelength': wavelengths[idx],
             'reflectance': reflectance[idx]
         })
-    
+
     for idx in sorted_valleys:
         results.append({
             'type': 'Valley',
             'wavelength': wavelengths[idx],
             'reflectance': reflectance[idx]
         })
-    
+
     return results
 
 # ----------------------------
@@ -725,12 +727,12 @@ def analyze_fft(gray, num_peaks=5, enable_notch=False):
     f_shift = np.fft.fftshift(f)
     magnitude = np.abs(f_shift)
     power_spectrum = np.log(magnitude + 1)
-    
+
     # Find peaks (excluding DC component)
     cy, cx = h // 2, w // 2
     magnitude_copy = magnitude.copy()
     magnitude_copy[cy-5:cy+5, cx-5:cx+5] = 0  # Mask DC
-    
+
     peaks = []
     for _ in range(num_peaks):
         y, x = np.unravel_index(np.argmax(magnitude_copy), magnitude_copy.shape)
@@ -741,7 +743,7 @@ def analyze_fft(gray, num_peaks=5, enable_notch=False):
         peaks.append({'radius': r, 'angle': angle, 'magnitude': magnitude_copy[y, x]})
         # Mask region around peak
         magnitude_copy[max(0,y-3):min(h,y+3), max(0,x-3):min(w,x+3)] = 0
-    
+
     # Fundamental period and orientation
     if peaks:
         fund_r = peaks[0]['radius']
@@ -750,16 +752,16 @@ def analyze_fft(gray, num_peaks=5, enable_notch=False):
     else:
         fund_period = 0
         fund_orientation = 0
-    
+
     # Anisotropy ratio
     radial_profile = []
     for r in range(1, min(cx, cy)):
         mask = ((np.arange(h)[:, None] - cy)**2 + (np.arange(w) - cx)**2 < (r+1)**2) & \
                ((np.arange(h)[:, None] - cy)**2 + (np.arange(w) - cx)**2 >= r**2)
         radial_profile.append(np.mean(magnitude[mask]) if mask.any() else 0)
-    
+
     anisotropy = np.std(radial_profile) / (np.mean(radial_profile) + 1e-8) if radial_profile else 0
-    
+
     # Optional notch filter
     if enable_notch and peaks:
         for peak in peaks[:3]:
@@ -771,7 +773,7 @@ def analyze_fft(gray, num_peaks=5, enable_notch=False):
         residual = np.abs(filtered).real
     else:
         residual = None
-    
+
     return {
         'power_spectrum': power_spectrum,
         'peaks': peaks,
@@ -786,7 +788,7 @@ def analyze_gabor(gray, frequencies=[0.1, 0.2, 0.3], num_orientations=8):
     """Multi-scale, multi-orientation Gabor analysis"""
     results = []
     energy_maps = []
-    
+
     for freq in frequencies:
         for i in range(num_orientations):
             theta = i * np.pi / num_orientations
@@ -795,7 +797,7 @@ def analyze_gabor(gray, frequencies=[0.1, 0.2, 0.3], num_orientations=8):
             filtered_imag = ndimage.convolve(gray, kernel.imag, mode='wrap')
             energy = np.sqrt(filtered_real**2 + filtered_imag**2)
             energy_maps.append(energy)
-            
+
             results.append({
                 'frequency': freq,
                 'orientation_deg': np.degrees(theta),
@@ -803,15 +805,15 @@ def analyze_gabor(gray, frequencies=[0.1, 0.2, 0.3], num_orientations=8):
                 'variance': float(np.var(energy)),
                 'max': float(np.max(energy))
             })
-    
+
     # Dominant orientation
     mean_energies = [r['mean'] for r in results]
     dom_idx = np.argmax(mean_energies)
     dominant_orientation = results[dom_idx]['orientation_deg']
-    
+
     # Coherency (ratio of max to mean energy)
     coherency = np.max(mean_energies) / (np.mean(mean_energies) + 1e-8)
-    
+
     return {
         'results': results,
         'energy_maps': energy_maps,
@@ -824,14 +826,14 @@ def analyze_glcm(gray, distances=[1, 3, 5], angles=[0, 45, 90, 135]):
     """GLCM texture features"""
     # Convert to 8-bit
     gray_8bit = img_as_ubyte(gray)
-    
+
     # Convert angles to radians
     angles_rad = [np.radians(a) for a in angles]
-    
+
     # Compute GLCM
-    glcm = graycomatrix(gray_8bit, distances=distances, angles=angles_rad, 
+    glcm = graycomatrix(gray_8bit, distances=distances, angles=angles_rad,
                          levels=256, symmetric=True, normed=True)
-    
+
     # Extract properties
     props = {}
     for prop in ['contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation', 'ASM']:
@@ -840,12 +842,12 @@ def analyze_glcm(gray, distances=[1, 3, 5], angles=[0, 45, 90, 135]):
             props[prop] = graycoprops(glcm, prop_name).mean()
         else:
             props['ASM'] = graycoprops(glcm, 'energy').mean()  # ASM = energy
-    
+
     # Calculate entropy manually
     glcm_mean = glcm.mean(axis=(2, 3))
     entropy = -np.sum(glcm_mean * np.log(glcm_mean + 1e-10))
     props['entropy'] = entropy
-    
+
     return props
 
 def compute_glcm_zscores(glcm_ref, glcm_test):
@@ -860,24 +862,24 @@ def compute_glcm_zscores(glcm_ref, glcm_test):
         'ASM': 0.05,
         'entropy': 0.5
     }
-    
+
     zscores = {}
     for feat in glcm_ref.keys():
         diff = glcm_test[feat] - glcm_ref[feat]
         std = typical_stds.get(feat, 1.0)
         zscores[feat] = diff / std
-    
+
     return zscores
 
 # ========== LBP ==========
 def analyze_lbp(gray, P=24, R=3):
     """Local Binary Patterns"""
     lbp = local_binary_pattern(gray, P, R, method='uniform')
-    
+
     # Histogram
     n_bins = int(lbp.max() + 1)
     hist, _ = np.histogram(lbp.ravel(), bins=n_bins, range=(0, n_bins), density=True)
-    
+
     return {'lbp_map': lbp, 'histogram': hist, 'n_bins': n_bins}
 
 def lbp_chi2_distance(hist1, hist2):
@@ -893,7 +895,7 @@ def lbp_bhattacharyya_distance(hist1, hist2):
 def analyze_wavelet(gray, wavelet='db4', levels=3):
     """Wavelet multiresolution analysis"""
     coeffs = pywt.wavedec2(gray, wavelet, level=levels)
-    
+
     # Calculate energies for each level
     energies = []
     for i, (cH, cV, cD) in enumerate(coeffs[1:], start=1):
@@ -901,7 +903,7 @@ def analyze_wavelet(gray, wavelet='db4', levels=3):
         energy_LH = np.sum(cH**2)
         energy_HL = np.sum(cV**2)
         energy_HH = np.sum(cD**2)
-        
+
         energies.append({
             'level': i,
             'LL': energy_LL,
@@ -910,7 +912,7 @@ def analyze_wavelet(gray, wavelet='db4', levels=3):
             'HH': energy_HH,
             'total': energy_LL + energy_LH + energy_HL + energy_HH
         })
-    
+
     return {'coeffs': coeffs, 'energies': energies}
 
 # ========== EDGE / STRUCTURE ==========
@@ -918,30 +920,30 @@ def analyze_structure_tensor(gray):
     """Structure tensor for coherency and line orientation"""
     # Gradients
     Iy, Ix = np.gradient(gray)
-    
+
     # Structure tensor components
     Ixx = ndimage.gaussian_filter(Ix * Ix, sigma=1.5)
     Iyy = ndimage.gaussian_filter(Iy * Iy, sigma=1.5)
     Ixy = ndimage.gaussian_filter(Ix * Iy, sigma=1.5)
-    
+
     # Eigenvalues
     trace = Ixx + Iyy
     det = Ixx * Iyy - Ixy**2
     lambda1 = trace / 2 + np.sqrt(np.maximum((trace/2)**2 - det, 0))
     lambda2 = trace / 2 - np.sqrt(np.maximum((trace/2)**2 - det, 0))
-    
+
     # Coherency
     coherency = (lambda1 - lambda2) / (lambda1 + lambda2 + 1e-10)
-    
+
     # Orientation (in radians)
     orientation = 0.5 * np.arctan2(2 * Ixy, Ixx - Iyy)
-    
+
     # Create orientation histogram (convert to degrees)
     orientation_deg = np.degrees(orientation).flatten()
     # Filter by coherency (only include strong edges)
     strong_edges_mask = coherency.flatten() > 0.3
     filtered_orientations = orientation_deg[strong_edges_mask]
-    
+
     return {
         'coherency': coherency,
         'orientation': orientation,
@@ -955,10 +957,10 @@ def compute_hog_density(gray):
         # Compute HOG features
         fd, hog_image = hog(gray, orientations=9, pixels_per_cell=(8, 8),
                            cells_per_block=(2, 2), visualize=True)
-        
+
         # Edge density metric: mean magnitude of HOG features
         edge_density = float(np.mean(np.abs(fd)))
-        
+
         return {
             'edge_density': edge_density,
             'hog_features': fd,
@@ -976,12 +978,12 @@ def compute_hog_density(gray):
 def analyze_defects(gray, min_area=50, morph_kernel_size=5, saliency_strength=1.0):
     """Defect detection using morphology and saliency"""
     gray_8bit = img_as_ubyte(gray)
-    
+
     # Top-hat and bottom-hat
     selem = disk(morph_kernel_size)
     tophat = white_tophat(gray_8bit, selem)
     bottomhat = black_tophat(gray_8bit, selem)
-    
+
     # Spectral residual saliency
     f = np.fft.fft2(gray)
     magnitude = np.abs(f)
@@ -991,15 +993,15 @@ def analyze_defects(gray, min_area=50, morph_kernel_size=5, saliency_strength=1.
     saliency_map = np.abs(np.fft.ifft2(np.exp(spectral_residual + 1j * phase)))**2
     saliency_map = (saliency_map - saliency_map.min()) / (saliency_map.max() - saliency_map.min() + 1e-10)
     saliency_map = saliency_map * saliency_strength
-    
+
     # Threshold saliency
     thresh = threshold_otsu(saliency_map)
     binary = saliency_map > thresh
-    
+
     # Label defects
     labeled = label(binary)
     regions = regionprops(labeled)
-    
+
     # Filter by area
     defects = []
     for region in regions:
@@ -1011,7 +1013,7 @@ def analyze_defects(gray, min_area=50, morph_kernel_size=5, saliency_strength=1.
                 'bbox': (x0, y0, x1, y1),
                 'centroid': region.centroid
             })
-    
+
     return {
         'tophat': tophat,
         'bottomhat': bottomhat,
@@ -1055,7 +1057,7 @@ def apply_circular_crop(img, center_x, center_y, diameter):
     mask = np.zeros((h, w), dtype=np.uint8)
     radius = diameter // 2
     cv2.circle(mask, (center_x, center_y), radius, 255, -1)
-    
+
     if len(img.shape) == 3:
         mask_3ch = np.stack([mask, mask, mask], axis=-1)
         return np.where(mask_3ch > 0, img, 0)
@@ -1066,16 +1068,16 @@ def apply_rectangular_crop(img, center_x, center_y, width, height):
     """Apply rectangular crop to image, masking outside as black"""
     h, w = img.shape[:2]
     mask = np.zeros((h, w), dtype=np.uint8)
-    
+
     # Calculate rectangle corners
     x1 = max(0, center_x - width // 2)
     y1 = max(0, center_y - height // 2)
     x2 = min(w, center_x + width // 2)
     y2 = min(h, center_y + height // 2)
-    
+
     # Fill rectangle
     mask[y1:y2, x1:x2] = 255
-    
+
     if len(img.shape) == 3:
         mask_3ch = np.stack([mask, mask, mask], axis=-1)
         return np.where(mask_3ch > 0, img, 0)
@@ -1086,7 +1088,7 @@ def apply_crop(img, settings):
     """Apply crop based on settings (circle or rectangle)"""
     if not settings.use_crop:
         return img
-    
+
     if settings.crop_shape == "circle":
         return apply_circular_crop(img, settings.crop_center_x, settings.crop_center_y, settings.crop_diameter)
     else:  # rectangle
@@ -1120,10 +1122,10 @@ def draw_rectangle_on_image(img, center_x, center_y, width, height, color=(255, 
 def draw_crop_region_on_image(img, settings, color=(255, 0, 0), thickness=3):
     """Draw crop region on image based on settings"""
     if settings.crop_shape == "circle":
-        return draw_circle_on_image(img, settings.crop_center_x, settings.crop_center_y, 
+        return draw_circle_on_image(img, settings.crop_center_x, settings.crop_center_y,
                                    settings.crop_diameter, color, thickness)
     else:  # rectangle
-        return draw_rectangle_on_image(img, settings.crop_center_x, settings.crop_center_y, 
+        return draw_rectangle_on_image(img, settings.crop_center_x, settings.crop_center_y,
                                       settings.crop_width, settings.crop_height, color, thickness)
 
 def interactive_region_selector(ref_img, test_img, settings):
@@ -1132,15 +1134,15 @@ def interactive_region_selector(ref_img, test_img, settings):
     Updates settings in-place.
     """
     h, w = ref_img.shape[:2]
-    
+
     # Initialize values from settings or use image center
     if settings.crop_center_x == 0 and settings.crop_center_y == 0:
         settings.crop_center_x = w // 2
         settings.crop_center_y = h // 2
-    
+
     # Create output widget for displaying images
     image_output = Output()
-    
+
     # Create control widgets
     shape_dropdown = widgets.Dropdown(
         options=['circle', 'rectangle'],
@@ -1149,7 +1151,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     center_x_slider = IntText(
         value=settings.crop_center_x,
         min=0,
@@ -1158,7 +1160,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     center_y_slider = IntText(
         value=settings.crop_center_y,
         min=0,
@@ -1167,7 +1169,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     diameter_slider = IntText(
         value=settings.crop_diameter,
         min=50,
@@ -1176,7 +1178,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     width_slider = IntText(
         value=settings.crop_width,
         min=50,
@@ -1185,7 +1187,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     height_slider = IntText(
         value=settings.crop_height,
         min=50,
@@ -1194,23 +1196,23 @@ def interactive_region_selector(ref_img, test_img, settings):
         style={'description_width': '120px'},
         layout=Layout(width='300px')
     )
-    
+
     apply_btn = Button(
         description='✅ Apply Selection',
         button_style='success',
         layout=Layout(width='300px', height='40px'),
         style={'button_color': '#27AE60', 'font_weight': 'bold'}
     )
-    
+
     # Function to update image display
     def update_display():
         with image_output:
             image_output.clear_output(wait=True)
-            
+
             # Get current values
             cx = center_x_slider.value
             cy = center_y_slider.value
-            
+
             # Create temporary settings for display
             temp_settings = QCSettings()
             temp_settings.crop_shape = shape_dropdown.value
@@ -1219,11 +1221,11 @@ def interactive_region_selector(ref_img, test_img, settings):
             temp_settings.crop_diameter = diameter_slider.value
             temp_settings.crop_width = width_slider.value
             temp_settings.crop_height = height_slider.value
-            
+
             # Draw regions on both images
             ref_display = draw_crop_region_on_image(ref_img, temp_settings, color=(0, 255, 0), thickness=2)
             test_display = draw_crop_region_on_image(test_img, temp_settings, color=(0, 255, 0), thickness=2)
-            
+
             # Resize for display if images are too large
             max_display_width = 500
             if w > max_display_width:
@@ -1232,22 +1234,22 @@ def interactive_region_selector(ref_img, test_img, settings):
                 new_h = int(h * scale)
                 ref_display = cv2.resize(ref_display, (new_w, new_h))
                 test_display = cv2.resize(test_display, (new_w, new_h))
-            
+
             # Combine images side by side
             combined = np.hstack([ref_display, test_display])
-            
+
             # Convert to PIL and display
             combined_pil = Image.fromarray(combined)
-            
+
             # Add labels
             fig, ax = plt.subplots(1, 1, figsize=(14, 7))
             ax.imshow(combined_pil)
             ax.axis('off')
-            ax.set_title(f'Reference (Left) | Sample (Right) | Shape: {temp_settings.crop_shape.title()} | Center: ({cx}, {cy})', 
+            ax.set_title(f'Reference (Left) | Sample (Right) | Shape: {temp_settings.crop_shape.title()} | Center: ({cx}, {cy})',
                         fontsize=14, pad=10)
             plt.tight_layout()
             plt.show()
-    
+
     # Function to toggle visibility of shape-specific controls
     def update_controls_visibility(change=None):
         if shape_dropdown.value == 'circle':
@@ -1259,7 +1261,7 @@ def interactive_region_selector(ref_img, test_img, settings):
             width_slider.layout.display = 'block'
             height_slider.layout.display = 'block'
         update_display()
-    
+
     # Function to apply selection
     def on_apply_clicked(b):
         settings.crop_shape = shape_dropdown.value
@@ -1269,11 +1271,11 @@ def interactive_region_selector(ref_img, test_img, settings):
         settings.crop_width = width_slider.value
         settings.crop_height = height_slider.value
         settings.use_crop = True
-        
+
         with image_output:
             image_output.clear_output(wait=True)
             success_html = f"""
-            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); 
+            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
                         padding: 20px; border-radius: 10px; text-align: center; margin: 10px 0;'>
                 <h3 style='color: white; margin: 0;'>✅ Region Selection Applied!</h3>
                 <p style='color: #ecf0f1; margin: 5px 0 0 0;'>
@@ -1282,7 +1284,7 @@ def interactive_region_selector(ref_img, test_img, settings):
             </div>
             """
             display(HTML(success_html))
-    
+
     # Attach event handlers
     shape_dropdown.observe(update_controls_visibility, 'value')
     center_x_slider.observe(lambda change: update_display(), 'value')
@@ -1291,13 +1293,13 @@ def interactive_region_selector(ref_img, test_img, settings):
     width_slider.observe(lambda change: update_display(), 'value')
     height_slider.observe(lambda change: update_display(), 'value')
     apply_btn.on_click(on_apply_clicked)
-    
+
     # Initial display setup
     update_controls_visibility()
-    
+
     # Create UI layout
     title_html = HTMLWidget(value="""
-        <div style='background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); 
+        <div style='background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
                     padding: 15px; border-radius: 10px; text-align: center; margin: 10px 0;'>
             <h3 style='color: white; margin: 0;'>🎯 Interactive Region Selector</h3>
             <p style='color: #ecf0f1; margin: 5px 0 0 0; font-size: 12px;'>
@@ -1305,7 +1307,7 @@ def interactive_region_selector(ref_img, test_img, settings):
             </p>
         </div>
     """)
-    
+
     controls = VBox([
         title_html,
         shape_dropdown,
@@ -1316,7 +1318,7 @@ def interactive_region_selector(ref_img, test_img, settings):
         height_slider,
         apply_btn
     ])
-    
+
     # Display the UI
     display(controls)
     display(image_output)
@@ -1422,7 +1424,7 @@ def plot_fft_power_spectrum(power_spectrum, peaks, path):
     plt.imshow(power_spectrum, cmap='hot', origin='lower')
     plt.colorbar(label='Log Magnitude')
     plt.title('2D FFT Power Spectrum')
-    
+
     # Mark peaks
     h, w = power_spectrum.shape
     cy, cx = h // 2, w // 2
@@ -1431,7 +1433,7 @@ def plot_fft_power_spectrum(power_spectrum, peaks, path):
         x = cx + peak['radius'] * np.cos(np.radians(peak['angle']))
         plt.plot(x, y, 'go', markersize=8)
         plt.text(x+5, y+5, f"P{i+1}", color='white', fontsize=8)
-    
+
     plt.xlabel('Frequency X')
     plt.ylabel('Frequency Y')
     save_fig(path)
@@ -1440,11 +1442,11 @@ def plot_gabor_montage(energy_maps, frequencies, num_orientations, path):
     """Plot Gabor filter response montage"""
     n_freq = len(frequencies)
     n_orient = num_orientations
-    
+
     fig, axes = plt.subplots(n_freq, min(n_orient, 8), figsize=(12, n_freq * 1.5))
     if n_freq == 1:
         axes = axes[np.newaxis, :]
-    
+
     idx = 0
     for i, freq in enumerate(frequencies):
         for j in range(min(n_orient, 8)):
@@ -1453,7 +1455,7 @@ def plot_gabor_montage(energy_maps, frequencies, num_orientations, path):
                 axes[i, j].axis('off')
                 axes[i, j].set_title(f"{freq:.2f}, {j*180//n_orient}°", fontsize=8)
             idx += 1
-    
+
     plt.suptitle('Gabor Filter Bank Responses', fontsize=12, fontweight='bold')
     plt.tight_layout()
     save_fig(path)
@@ -1462,7 +1464,7 @@ def plot_gabor_orientation_histogram(gabor_results, path):
     """Plot orientation histogram from Gabor"""
     orientations = [r['orientation_deg'] for r in gabor_results]
     energies = [r['mean'] for r in gabor_results]
-    
+
     plt.figure(figsize=(6, 4))
     plt.bar(orientations, energies, width=15, alpha=0.7, color='steelblue')
     plt.xlabel('Orientation (degrees)')
@@ -1476,17 +1478,17 @@ def plot_glcm_radar(glcm_props_ref, glcm_props_sample, path):
     categories = list(glcm_props_ref.keys())
     ref_values = [glcm_props_ref[k] for k in categories]
     sample_values = [glcm_props_sample[k] for k in categories]
-    
+
     # Normalize to 0-1 for radar
     max_val = max(max(ref_values), max(sample_values)) + 1e-8
     ref_norm = [v / max_val for v in ref_values]
     sample_norm = [v / max_val for v in sample_values]
-    
+
     angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
     ref_norm += ref_norm[:1]
     sample_norm += sample_norm[:1]
     angles += angles[:1]
-    
+
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(projection='polar'))
     ax.plot(angles, ref_norm, 'o-', linewidth=2, label='Reference', color='green')
     ax.fill(angles, ref_norm, alpha=0.15, color='green')
@@ -1503,12 +1505,12 @@ def plot_glcm_radar(glcm_props_ref, glcm_props_sample, path):
 def plot_lbp_map_and_hist(lbp_map, hist_ref, hist_sample, path):
     """Plot LBP map and histogram comparison"""
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    
+
     # LBP map (sample)
     axes[0].imshow(lbp_map, cmap='gray')
     axes[0].set_title('LBP Map (Sample)')
     axes[0].axis('off')
-    
+
     # Histogram comparison
     x = np.arange(len(hist_ref))
     axes[1].bar(x - 0.2, hist_ref, width=0.4, alpha=0.7, label='Reference', color='green')
@@ -1518,24 +1520,24 @@ def plot_lbp_map_and_hist(lbp_map, hist_ref, hist_sample, path):
     axes[1].set_title('LBP Histogram Comparison')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
     save_fig(path)
 
 def plot_wavelet_energy_bars(energies_ref, energies_sample, path):
     """Plot wavelet energy comparison"""
     levels = [e['level'] for e in energies_ref]
-    
+
     fig, axes = plt.subplots(2, 2, figsize=(10, 6))
     bands = ['LH', 'HL', 'HH', 'total']
     colors_ref = ['#2ecc71', '#3498db', '#9b59b6', '#e74c3c']
     colors_sample = ['#27ae60', '#2980b9', '#8e44ad', '#c0392b']
-    
+
     for idx, band in enumerate(bands):
         ax = axes[idx // 2, idx % 2]
         ref_vals = [e[band] for e in energies_ref]
         sample_vals = [e[band] for e in energies_sample]
-        
+
         x = np.arange(len(levels))
         ax.bar(x - 0.2, ref_vals, width=0.4, alpha=0.7, label='Reference', color=colors_ref[idx])
         ax.bar(x + 0.2, sample_vals, width=0.4, alpha=0.7, label='Sample', color=colors_sample[idx])
@@ -1546,7 +1548,7 @@ def plot_wavelet_energy_bars(energies_ref, energies_sample, path):
         ax.set_xticklabels(levels)
         ax.legend()
         ax.grid(True, alpha=0.3)
-    
+
     plt.suptitle('Wavelet Decomposition Energy', fontsize=14, fontweight='bold')
     plt.tight_layout()
     save_fig(path)
@@ -1554,17 +1556,17 @@ def plot_wavelet_energy_bars(energies_ref, energies_sample, path):
 def plot_defect_saliency(saliency_map, binary_map, defects, original_shape, path):
     """Plot defect saliency and detection results"""
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    
+
     # Saliency map
     axes[0].imshow(saliency_map, cmap='hot')
     axes[0].set_title('Saliency Map')
     axes[0].axis('off')
-    
+
     # Binary map
     axes[1].imshow(binary_map, cmap='gray')
     axes[1].set_title(f'Binary Defect Map ({len(defects)} defects)')
     axes[1].axis('off')
-    
+
     # Defects overlay
     overlay = np.zeros((*original_shape, 3), dtype=np.uint8)
     for defect in defects:
@@ -1573,7 +1575,7 @@ def plot_defect_saliency(saliency_map, binary_map, defects, original_shape, path
     axes[2].imshow(overlay)
     axes[2].set_title('Detected Defects')
     axes[2].axis('off')
-    
+
     plt.tight_layout()
     save_fig(path)
 
@@ -1582,7 +1584,7 @@ def plot_metamerism_illuminants(illuminants, delta_e_values, path):
     plt.figure(figsize=(8, 5))
     x = np.arange(len(illuminants))
     bars = plt.bar(x, delta_e_values, alpha=0.7, color='steelblue', edgecolor='navy')
-    
+
     # Color bars by severity
     for i, de in enumerate(delta_e_values):
         if de < 2.0:
@@ -1591,10 +1593,10 @@ def plot_metamerism_illuminants(illuminants, delta_e_values, path):
             bars[i].set_color('#f39c12')
         else:
             bars[i].set_color('#e74c3c')
-    
+
     plt.axhline(y=2.0, color='green', linestyle='--', linewidth=1, alpha=0.5, label='PASS threshold')
     plt.axhline(y=3.5, color='orange', linestyle='--', linewidth=1, alpha=0.5, label='Conditional threshold')
-    
+
     plt.xticks(x, illuminants, rotation=45)
     plt.xlabel('Illuminant')
     plt.ylabel('ΔE2000')
@@ -1629,24 +1631,24 @@ def plot_spectral_curve(wavelengths, reflectance_ref, reflectance_sample, path):
 def plot_line_angle_histogram(orientation_degrees, path):
     """Plot line angle histogram from structure tensor"""
     plt.figure(figsize=(7, 4))
-    
+
     # Create histogram
     bins = np.arange(-90, 91, 10)
     hist, bin_edges = np.histogram(orientation_degrees, bins=bins)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-    
+
     plt.bar(bin_centers, hist, width=8, alpha=0.7, color='steelblue', edgecolor='navy')
     plt.xlabel('Orientation Angle (degrees)', fontsize=12)
     plt.ylabel('Frequency', fontsize=12)
     plt.title('Line Angle Distribution (Structure Tensor)', fontsize=13, fontweight='bold')
     plt.grid(True, alpha=0.3, axis='y')
     plt.xlim(-90, 90)
-    
+
     # Add reference lines
     plt.axvline(0, color='red', linestyle='--', linewidth=1, alpha=0.5, label='Horizontal')
     plt.axvline(90, color='green', linestyle='--', linewidth=1, alpha=0.5, label='Vertical')
     plt.axvline(-90, color='green', linestyle='--', linewidth=1, alpha=0.5)
-    
+
     plt.legend(fontsize=9)
     plt.tight_layout()
     save_fig(path)
@@ -1747,7 +1749,7 @@ def header_footer(canvas_, doc):
     canvas_.setStrokeColor(NEUTRAL_L)
     canvas_.setLineWidth(0.6)
     canvas_.line(MARGIN_L, fy+10, width - MARGIN_R, fy+10)
-    
+
     # page number (start numbering so that "Color Unit" page is 2)
     pno = canvas_.getPageNumber()
     # first page (cover) is unnumbered; subsequent pages offset by +0 so second phys page shows "2"
@@ -1755,7 +1757,7 @@ def header_footer(canvas_, doc):
         canvas_.setFillColor(NEUTRAL)
         canvas_.setFont("Helvetica", 9)
         canvas_.drawRightString(width - MARGIN_R, fy-2, f"Page {pno}")
-        
+
         # Company logo on opposite side (left)
         logo_path = pick_logo()
         if logo_path and os.path.exists(logo_path):
@@ -1763,7 +1765,7 @@ def header_footer(canvas_, doc):
             logo_height = 16
             logo_width = 32  # Assuming 2:1 aspect ratio for logo_vertical_512x256.png
             try:
-                canvas_.drawImage(logo_path, MARGIN_L, fy-4, width=logo_width, height=logo_height, 
+                canvas_.drawImage(logo_path, MARGIN_L, fy-4, width=logo_width, height=logo_height,
                                 preserveAspectRatio=True, mask='auto')
             except:
                 pass  # Silently fail if logo cannot be drawn
@@ -1772,12 +1774,12 @@ def header_footer(canvas_, doc):
 
 def create_report_sections_ui(settings):
     """Create interactive report sections selector with hierarchical checkboxes"""
-    
+
     section_style = "background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #F39C12;"
     subsection_style = "margin-left: 30px; padding: 5px 0;"
-    
+
     title_html = """
-        <div style='background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%); 
+        <div style='background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
                     padding: 20px; border-radius: 10px 10px 0 0; margin-bottom: 0;'>
             <h2 style='color: white; margin: 0; font-family: Arial, sans-serif;'>
                 📋 Report Sections Control
@@ -1787,16 +1789,16 @@ def create_report_sections_ui(settings):
             </p>
         </div>
     """
-    
+
     info_html = """
         <div style='background: #fff3cd; padding: 12px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #F39C12;'>
             <p style='margin: 0; color: #856404; font-size: 12px;'>
-                <b>💡 Tip:</b> Disabling a section will skip its processing entirely, saving time. 
+                <b>💡 Tip:</b> Disabling a section will skip its processing entirely, saving time.
                 Disabling a main section will also disable all its sub-sections.
             </p>
         </div>
     """
-    
+
     # Create checkboxes for all sections
     # Main section: Analysis Settings
     chk_analysis_settings = widgets.Checkbox(
@@ -1805,7 +1807,7 @@ def create_report_sections_ui(settings):
         style={'description_width': 'initial', 'font_weight': 'bold'},
         layout=Layout(width='400px')
     )
-    
+
     # Main section: Color Unit
     chk_color_unit = widgets.Checkbox(
         value=settings.enable_color_unit,
@@ -1813,7 +1815,7 @@ def create_report_sections_ui(settings):
         style={'description_width': 'initial', 'font_weight': 'bold'},
         layout=Layout(width='400px')
     )
-    
+
     # Color Unit sub-sections
     chk_color_input_images = widgets.Checkbox(
         value=settings.enable_color_input_images,
@@ -1821,77 +1823,77 @@ def create_report_sections_ui(settings):
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_measurements = widgets.Checkbox(
         value=settings.enable_color_measurements,
         description='Color Measurements',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_difference = widgets.Checkbox(
         value=settings.enable_color_difference,
         description='Color Difference (ΔE)',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_statistical = widgets.Checkbox(
         value=settings.enable_color_statistical,
         description='Statistical Analysis (RGB)',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_spectral_proxy = widgets.Checkbox(
         value=settings.enable_color_spectral_proxy,
         description='Spectral Analysis (Proxy)',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_visual_diff = widgets.Checkbox(
         value=settings.enable_color_visual_diff,
         description='Visual Difference Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_lab_detailed = widgets.Checkbox(
         value=settings.enable_color_lab_detailed,
         description='Detailed Lab* Color Space Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_lab_viz = widgets.Checkbox(
         value=settings.enable_color_lab_viz,
         description='Lab* Visualizations',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_quality_assessment = widgets.Checkbox(
         value=settings.enable_color_quality_assessment,
         description='Quality Assessment (Lab* thresholds)',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_scoring = widgets.Checkbox(
         value=settings.enable_color_scoring,
         description='Scoring & Status',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_color_recommendations = widgets.Checkbox(
         value=settings.enable_color_recommendations,
         description='Recommendations',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     # Main section: Pattern Unit
     chk_pattern_unit = widgets.Checkbox(
         value=settings.enable_pattern_unit,
@@ -1899,7 +1901,7 @@ def create_report_sections_ui(settings):
         style={'description_width': 'initial', 'font_weight': 'bold'},
         layout=Layout(width='400px')
     )
-    
+
     # Pattern Unit sub-sections
     chk_pattern_ssim = widgets.Checkbox(
         value=settings.enable_pattern_ssim,
@@ -1907,35 +1909,35 @@ def create_report_sections_ui(settings):
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_pattern_symmetry = widgets.Checkbox(
         value=settings.enable_pattern_symmetry,
         description='Symmetry Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_pattern_edge = widgets.Checkbox(
         value=settings.enable_pattern_edge,
         description='Edge Definition',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_pattern_repeat = widgets.Checkbox(
         value=settings.enable_pattern_repeat,
         description='Repeat Period Estimation',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_pattern_advanced = widgets.Checkbox(
         value=settings.enable_pattern_advanced,
         description='Advanced Texture Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     # Main section: Spectrophotometer Simulation
     chk_spectro = widgets.Checkbox(
         value=settings.enable_spectrophotometer,
@@ -1943,7 +1945,7 @@ def create_report_sections_ui(settings):
         style={'description_width': 'initial', 'font_weight': 'bold'},
         layout=Layout(width='400px')
     )
-    
+
     # Spectrophotometer sub-sections
     chk_spectro_config = widgets.Checkbox(
         value=settings.enable_spectro_config,
@@ -1951,42 +1953,42 @@ def create_report_sections_ui(settings):
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_spectro_color_diff_methods = widgets.Checkbox(
         value=settings.enable_spectro_color_diff_methods,
         description='Color Difference Methods',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_spectro_whiteness = widgets.Checkbox(
         value=settings.enable_spectro_whiteness,
         description='Whiteness & Yellowness Indices',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_spectro_metamerism = widgets.Checkbox(
         value=settings.enable_spectro_metamerism,
         description='Metamerism Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_spectro_spectral_data = widgets.Checkbox(
         value=settings.enable_spectro_spectral_data,
         description='True Spectral Reflectance Analysis',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     chk_spectro_calibration = widgets.Checkbox(
         value=settings.enable_spectro_calibration,
         description='Calibration & Limitations',
         indent=False,
         layout=Layout(width='380px', margin='0 0 0 30px')
     )
-    
+
     # Store all checkboxes for later access
     color_subsections = [
         chk_color_input_images, chk_color_measurements, chk_color_difference,
@@ -1994,41 +1996,41 @@ def create_report_sections_ui(settings):
         chk_color_lab_detailed, chk_color_lab_viz, chk_color_quality_assessment,
         chk_color_scoring, chk_color_recommendations
     ]
-    
+
     pattern_subsections = [
         chk_pattern_ssim, chk_pattern_symmetry, chk_pattern_edge,
         chk_pattern_repeat, chk_pattern_advanced
     ]
-    
+
     spectro_subsections = [
         chk_spectro_config, chk_spectro_color_diff_methods, chk_spectro_whiteness,
         chk_spectro_metamerism, chk_spectro_spectral_data, chk_spectro_calibration
     ]
-    
+
     # Define handlers for main section checkboxes to control sub-sections
     def on_color_unit_change(change):
         enabled = change['new']
         for chk in color_subsections:
             chk.value = enabled
             chk.disabled = not enabled
-    
+
     def on_pattern_unit_change(change):
         enabled = change['new']
         for chk in pattern_subsections:
             chk.value = enabled
             chk.disabled = not enabled
-    
+
     def on_spectro_change(change):
         enabled = change['new']
         for chk in spectro_subsections:
             chk.value = enabled
             chk.disabled = not enabled
-    
+
     # Attach observers
     chk_color_unit.observe(on_color_unit_change, names='value')
     chk_pattern_unit.observe(on_pattern_unit_change, names='value')
     chk_spectro.observe(on_spectro_change, names='value')
-    
+
     # Initial state for sub-sections
     for chk in color_subsections:
         chk.disabled = not chk_color_unit.value
@@ -2036,7 +2038,7 @@ def create_report_sections_ui(settings):
         chk.disabled = not chk_pattern_unit.value
     for chk in spectro_subsections:
         chk.disabled = not chk_spectro.value
-    
+
     # Apply button
     btn_apply = Button(
         description='✅ Apply Sections',
@@ -2044,9 +2046,9 @@ def create_report_sections_ui(settings):
         layout=Layout(width='300px', height='40px', margin='20px 0'),
         style={'button_color': '#27AE60', 'font_weight': 'bold'}
     )
-    
+
     result_output = Output()
-    
+
     def on_apply_clicked(b):
         # Update settings
         settings.enable_analysis_settings = chk_analysis_settings.value
@@ -2062,14 +2064,14 @@ def create_report_sections_ui(settings):
         settings.enable_color_quality_assessment = chk_color_quality_assessment.value
         settings.enable_color_scoring = chk_color_scoring.value
         settings.enable_color_recommendations = chk_color_recommendations.value
-        
+
         settings.enable_pattern_unit = chk_pattern_unit.value
         settings.enable_pattern_ssim = chk_pattern_ssim.value
         settings.enable_pattern_symmetry = chk_pattern_symmetry.value
         settings.enable_pattern_edge = chk_pattern_edge.value
         settings.enable_pattern_repeat = chk_pattern_repeat.value
         settings.enable_pattern_advanced = chk_pattern_advanced.value
-        
+
         settings.enable_spectrophotometer = chk_spectro.value
         settings.enable_spectro_config = chk_spectro_config.value
         settings.enable_spectro_color_diff_methods = chk_spectro_color_diff_methods.value
@@ -2077,7 +2079,7 @@ def create_report_sections_ui(settings):
         settings.enable_spectro_metamerism = chk_spectro_metamerism.value
         settings.enable_spectro_spectral_data = chk_spectro_spectral_data.value
         settings.enable_spectro_calibration = chk_spectro_calibration.value
-        
+
         with result_output:
             result_output.clear_output()
             enabled_count = sum([
@@ -2087,7 +2089,7 @@ def create_report_sections_ui(settings):
                 settings.enable_spectrophotometer
             ])
             success_html = f"""
-            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); 
+            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
                         padding: 15px; border-radius: 10px; text-align: center; margin: 10px 0;'>
                 <h3 style='color: white; margin: 0;'>✅ Sections Applied!</h3>
                 <p style='color: #ecf0f1; margin: 5px 0 0 0;'>
@@ -2096,9 +2098,9 @@ def create_report_sections_ui(settings):
             </div>
             """
             display(HTML(success_html))
-    
+
     btn_apply.on_click(on_apply_clicked)
-    
+
     # Build the UI
     panel = VBox([
         HTMLWidget(value=title_html),
@@ -2115,16 +2117,16 @@ def create_report_sections_ui(settings):
         HBox([btn_apply], layout=Layout(justify_content='center')),
         result_output
     ], layout=Layout(border='2px solid #F39C12', border_radius='10px', padding='10px', margin='20px 0'))
-    
+
     return panel
 
 def create_settings_summary_table(settings):
     """Create a comprehensive settings summary table"""
     data = [["Parameter", "Value"]]
-    
+
     # Operator info
     data.append(["Operator", settings.operator_name])
-    
+
     # Color thresholds
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Color Analysis Thresholds</b>", StyleSmall), ""])
@@ -2133,13 +2135,13 @@ def create_settings_summary_table(settings):
     data.append(["Lab L* Threshold", f"{settings.lab_l_threshold:.2f}"])
     data.append(["Lab a*/b* Threshold", f"{settings.lab_ab_threshold:.2f}"])
     data.append(["Lab Overall Threshold", f"{settings.lab_overall_threshold:.2f}"])
-    
+
     # Pattern thresholds
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Pattern Analysis Thresholds</b>", StyleSmall), ""])
     data.append(["SSIM PASS Threshold", f"{settings.ssim_pass_threshold:.2f}"])
     data.append(["SSIM Conditional Threshold", f"{settings.ssim_conditional_threshold:.2f}"])
-    
+
     # Scoring parameters
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Scoring Parameters</b>", StyleSmall), ""])
@@ -2148,12 +2150,12 @@ def create_settings_summary_table(settings):
     data.append(["Color Score Minimum", f"{settings.color_score_threshold:.1f}"])
     data.append(["Pattern Score Minimum", f"{settings.pattern_score_threshold:.1f}"])
     data.append(["Overall Score Minimum", f"{settings.overall_score_threshold:.1f}"])
-    
+
     # Sampling
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Sampling Configuration</b>", StyleSmall), ""])
     data.append(["Number of Sample Points", str(settings.num_sample_points)])
-    
+
     # Region selection
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Region of Interest</b>", StyleSmall), ""])
@@ -2167,7 +2169,7 @@ def create_settings_summary_table(settings):
         else:
             data.append(["Width (px)", str(settings.crop_width)])
             data.append(["Height (px)", str(settings.crop_height)])
-    
+
     # Spectrophotometer settings
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Spectrophotometer Settings</b>", StyleSmall), ""])
@@ -2178,7 +2180,7 @@ def create_settings_summary_table(settings):
         data.append(["CMC l:c Ratio", settings.cmc_l_c_ratio])
     data.append(["Whiteness Min", f"{settings.whiteness_min:.1f}"])
     data.append(["Yellowness Max", f"{settings.yellowness_max:.1f}"])
-    
+
     # Advanced texture parameters
     data.append(["", ""])  # Separator
     data.append([Paragraph("<b>Advanced Texture Parameters</b>", StyleSmall), ""])
@@ -2195,10 +2197,10 @@ def create_settings_summary_table(settings):
     data.append(["Min Defect Area (px²)", str(settings.defect_min_area)])
     data.append(["Morph Kernel Size", str(settings.morph_kernel_size)])
     data.append(["Saliency Strength", f"{settings.saliency_strength:.1f}"])
-    
+
     # Create table with proper wrapping
     table = Table(data, colWidths=[3.2*inch, 3.0*inch], repeatRows=1)
-    
+
     style_cmds = [
         ("BACKGROUND", (0, 0), (-1, 0), BLUE2),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -2218,12 +2220,12 @@ def create_settings_summary_table(settings):
         ("TOPPADDING", (0, 1), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 1), (-1, -1), 4),
     ]
-    
+
     # Alternate row colors
     for i in range(2, len(data), 2):
         if data[i][0] != "":  # Skip separator rows
             style_cmds.append(("BACKGROUND", (0, i), (-1, i), colors.whitesmoke))
-    
+
     # Make section headers stand out
     for i, row in enumerate(data):
         if i > 0 and isinstance(row[0], Paragraph):
@@ -2231,7 +2233,7 @@ def create_settings_summary_table(settings):
             style_cmds.append(("SPAN", (0, i), (-1, i)))
             style_cmds.append(("FONTNAME", (0, i), (-1, i), "Helvetica-Bold"))
             style_cmds.append(("FONTSIZE", (0, i), (-1, i), 9))
-    
+
     table.setStyle(TableStyle(style_cmds))
     return table
 
@@ -2250,7 +2252,7 @@ def first_page_header(canvas_, doc):
 # ----------------------------
 def create_advanced_settings_ui(settings, ref_img, test_img):
     """Create interactive advanced settings panel with professional UI"""
-    
+
     # Style definitions
     title_style = """
         <div style='background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%);
@@ -2260,9 +2262,9 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
             </h2>
         </div>
     """
-    
+
     section_style = "background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #2980B9;"
-    
+
     # Operator info
     operator_input = Text(
         value=settings.operator_name,
@@ -2270,117 +2272,117 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         style={'description_width': '180px'},
         layout=Layout(width='400px')
     )
-    
+
     # Color thresholds
-    delta_e_thresh = FloatText(value=settings.delta_e_threshold, description='ΔE Threshold (PASS):', 
+    delta_e_thresh = FloatText(value=settings.delta_e_threshold, description='ΔE Threshold (PASS):',
                                 style={'description_width': '180px'}, layout=Layout(width='300px'))
-    delta_e_cond = FloatText(value=settings.delta_e_conditional, description='ΔE Conditional:', 
+    delta_e_cond = FloatText(value=settings.delta_e_conditional, description='ΔE Conditional:',
                              style={'description_width': '180px'}, layout=Layout(width='300px'))
-    lab_l_thresh = FloatText(value=settings.lab_l_threshold, description='Lab L* Threshold:', 
+    lab_l_thresh = FloatText(value=settings.lab_l_threshold, description='Lab L* Threshold:',
                              style={'description_width': '180px'}, layout=Layout(width='300px'))
-    lab_ab_thresh = FloatText(value=settings.lab_ab_threshold, description='Lab a*/b* Threshold:', 
+    lab_ab_thresh = FloatText(value=settings.lab_ab_threshold, description='Lab a*/b* Threshold:',
                               style={'description_width': '180px'}, layout=Layout(width='300px'))
-    lab_overall_thresh = FloatText(value=settings.lab_overall_threshold, description='Lab Overall Threshold:', 
+    lab_overall_thresh = FloatText(value=settings.lab_overall_threshold, description='Lab Overall Threshold:',
                                    style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Pattern thresholds
-    ssim_pass = FloatText(value=settings.ssim_pass_threshold, description='SSIM PASS (>):', 
+    ssim_pass = FloatText(value=settings.ssim_pass_threshold, description='SSIM PASS (>):',
                          style={'description_width': '180px'}, layout=Layout(width='300px'))
-    ssim_cond = FloatText(value=settings.ssim_conditional_threshold, description='SSIM Conditional (>):', 
+    ssim_cond = FloatText(value=settings.ssim_conditional_threshold, description='SSIM Conditional (>):',
                          style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Scoring parameters
-    color_multiplier = FloatText(value=settings.color_score_multiplier, description='Color Score Multiplier:', 
+    color_multiplier = FloatText(value=settings.color_score_multiplier, description='Color Score Multiplier:',
                                  style={'description_width': '180px'}, layout=Layout(width='300px'))
-    uniformity_multiplier = FloatText(value=settings.uniformity_std_multiplier, description='Uniformity Multiplier:', 
+    uniformity_multiplier = FloatText(value=settings.uniformity_std_multiplier, description='Uniformity Multiplier:',
                                       style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Quality thresholds
-    color_score_thresh = FloatText(value=settings.color_score_threshold, description='Color Score Min:', 
+    color_score_thresh = FloatText(value=settings.color_score_threshold, description='Color Score Min:',
                                    style={'description_width': '180px'}, layout=Layout(width='300px'))
-    pattern_score_thresh = FloatText(value=settings.pattern_score_threshold, description='Pattern Score Min:', 
+    pattern_score_thresh = FloatText(value=settings.pattern_score_threshold, description='Pattern Score Min:',
                                      style={'description_width': '180px'}, layout=Layout(width='300px'))
-    overall_score_thresh = FloatText(value=settings.overall_score_threshold, description='Overall Score Min:', 
+    overall_score_thresh = FloatText(value=settings.overall_score_threshold, description='Overall Score Min:',
                                      style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Number of sample points
-    num_points = IntText(value=settings.num_sample_points, description='Sample Points:', 
+    num_points = IntText(value=settings.num_sample_points, description='Sample Points:',
                         style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Build the panel
     title_widget = HTMLWidget(value=title_style)
-    
+
     operator_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#2980B9;'>👤 Operator Information</h3></div>"),
         operator_input
     ])
-    
+
     color_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#2980B9;'>🎨 Color Analysis Thresholds</h3></div>"),
         delta_e_thresh, delta_e_cond, lab_l_thresh, lab_ab_thresh, lab_overall_thresh
     ])
-    
+
     pattern_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#2980B9;'>📐 Pattern Analysis Thresholds</h3></div>"),
         ssim_pass, ssim_cond
     ])
-    
+
     scoring_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#2980B9;'>📊 Scoring Parameters</h3></div>"),
         color_multiplier, uniformity_multiplier, color_score_thresh, pattern_score_thresh, overall_score_thresh
     ])
-    
+
     sampling_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#2980B9;'>📍 Sampling Configuration</h3></div>"),
         num_points
     ])
-    
+
     # ===== ADVANCED TEXTURE PARAMETERS =====
     texture_style = "background: #e8f5e9; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #27AE60;"
-    
+
     # FFT parameters
-    fft_num_peaks_widget = IntText(value=settings.fft_num_peaks, description='FFT Peaks to Detect:', 
+    fft_num_peaks_widget = IntText(value=settings.fft_num_peaks, description='FFT Peaks to Detect:',
                                     style={'description_width': '180px'}, layout=Layout(width='300px'))
     fft_notch_widget = widgets.Checkbox(value=settings.fft_enable_notch, description='Enable FFT Notch Filter',
                                          style={'description_width': 'initial'}, layout=Layout(width='300px'))
-    
+
     # Gabor parameters
-    gabor_freq_widget = Text(value=settings.gabor_frequencies_str, description='Gabor Frequencies:', 
+    gabor_freq_widget = Text(value=settings.gabor_frequencies_str, description='Gabor Frequencies:',
                              style={'description_width': '180px'}, layout=Layout(width='400px'),
                              placeholder='e.g., 0.1, 0.2, 0.3')
-    gabor_num_orient_widget = IntText(value=settings.gabor_num_orientations, description='Gabor Orientations:', 
+    gabor_num_orient_widget = IntText(value=settings.gabor_num_orientations, description='Gabor Orientations:',
                                        style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # GLCM parameters (newly editable)
-    glcm_distances_widget = Text(value=settings.glcm_distances_str, description='GLCM Distances (px):', 
+    glcm_distances_widget = Text(value=settings.glcm_distances_str, description='GLCM Distances (px):',
                                   style={'description_width': '180px'}, layout=Layout(width='400px'),
                                   placeholder='e.g., 1, 3, 5')
-    glcm_angles_widget = Text(value=settings.glcm_angles_str, description='GLCM Angles (degrees):', 
+    glcm_angles_widget = Text(value=settings.glcm_angles_str, description='GLCM Angles (degrees):',
                                style={'description_width': '180px'}, layout=Layout(width='400px'),
                                placeholder='e.g., 0, 45, 90, 135')
-    
+
     # LBP parameters
-    lbp_points_widget = IntText(value=settings.lbp_points, description='LBP Points (P):', 
+    lbp_points_widget = IntText(value=settings.lbp_points, description='LBP Points (P):',
                                  style={'description_width': '180px'}, layout=Layout(width='300px'))
-    lbp_radius_widget = IntText(value=settings.lbp_radius, description='LBP Radius (R):', 
+    lbp_radius_widget = IntText(value=settings.lbp_radius, description='LBP Radius (R):',
                                  style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Wavelet parameters (newly editable type)
-    wavelet_type_widget = widgets.Dropdown(options=['db4', 'db2', 'db8', 'haar', 'sym2', 'coif1'], 
+    wavelet_type_widget = widgets.Dropdown(options=['db4', 'db2', 'db8', 'haar', 'sym2', 'coif1'],
                                             value=settings.wavelet_type,
-                                            description='Wavelet Family:', 
+                                            description='Wavelet Family:',
                                             style={'description_width': '180px'}, layout=Layout(width='300px'))
-    wavelet_levels_widget = IntText(value=settings.wavelet_levels, description='Wavelet Levels:', 
+    wavelet_levels_widget = IntText(value=settings.wavelet_levels, description='Wavelet Levels:',
                                      style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Defect detection
-    defect_min_area_widget = IntText(value=settings.defect_min_area, description='Min Defect Area (px²):', 
+    defect_min_area_widget = IntText(value=settings.defect_min_area, description='Min Defect Area (px²):',
                                       style={'description_width': '180px'}, layout=Layout(width='300px'))
-    morph_kernel_widget = IntText(value=settings.morph_kernel_size, description='Morph Kernel Size:', 
+    morph_kernel_widget = IntText(value=settings.morph_kernel_size, description='Morph Kernel Size:',
                                    style={'description_width': '180px'}, layout=Layout(width='300px'))
-    saliency_strength_widget = FloatText(value=settings.saliency_strength, description='Saliency Strength:', 
+    saliency_strength_widget = FloatText(value=settings.saliency_strength, description='Saliency Strength:',
                                           style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     texture_section = VBox([
         HTMLWidget(value=f"<div style='{texture_style}'><h3 style='margin-top:0; color:#27AE60;'>🔬 Advanced Texture Parameters</h3></div>"),
         HTMLWidget(value="<p style='margin: 10px 0; color: #555;'><b>FFT Analysis:</b></p>"),
@@ -2396,31 +2398,31 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         HTMLWidget(value="<p style='margin: 10px 0; color: #555;'><b>Defect Detection:</b></p>"),
         defect_min_area_widget, morph_kernel_widget, saliency_strength_widget
     ])
-    
+
     # ===== ENHANCED COLOR PARAMETERS =====
     color_adv_style = "background: #fff3e0; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #F39C12;"
-    
+
     # Observer and geometry
     observer_widget = widgets.Dropdown(options=['2', '10'], value=settings.observer_angle,
-                                        description='Observer Angle:', 
+                                        description='Observer Angle:',
                                         style={'description_width': '180px'}, layout=Layout(width='300px'))
     geometry_widget = widgets.Dropdown(options=['d/8 SCI', 'd/8 SCE', '45/0'], value=settings.geometry_mode,
-                                        description='Geometry Mode:', 
+                                        description='Geometry Mode:',
                                         style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # CMC parameters
     cmc_enable_widget = widgets.Checkbox(value=settings.use_delta_e_cmc, description='Enable ΔE CMC',
                                           style={'description_width': 'initial'}, layout=Layout(width='200px'))
     cmc_ratio_widget = widgets.Dropdown(options=['2:1', '1:1'], value=settings.cmc_l_c_ratio,
-                                         description='CMC l:c Ratio:', 
+                                         description='CMC l:c Ratio:',
                                          style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Whiteness/Yellowness thresholds
-    whiteness_min_widget = FloatText(value=settings.whiteness_min, description='Min Whiteness:', 
+    whiteness_min_widget = FloatText(value=settings.whiteness_min, description='Min Whiteness:',
                                       style={'description_width': '180px'}, layout=Layout(width='300px'))
-    yellowness_max_widget = FloatText(value=settings.yellowness_max, description='Max Yellowness:', 
+    yellowness_max_widget = FloatText(value=settings.yellowness_max, description='Max Yellowness:',
                                        style={'description_width': '180px'}, layout=Layout(width='300px'))
-    
+
     # Metamerism illuminants (multi-select)
     illuminant_options = ['D65', 'D50', 'TL84', 'A', 'F2', 'CWF', 'F7', 'F11']
     illuminant_select = widgets.SelectMultiple(
@@ -2430,18 +2432,18 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         style={'description_width': '180px'},
         layout=Layout(width='400px', height='120px')
     )
-    
+
     # Spectral CSV upload
-    spectral_enable_widget = widgets.Checkbox(value=settings.spectral_enable, 
+    spectral_enable_widget = widgets.Checkbox(value=settings.spectral_enable,
                                                description='Use Spectral Data (overrides RGB)',
-                                               style={'description_width': 'initial'}, 
+                                               style={'description_width': 'initial'},
                                                layout=Layout(width='350px'))
-    
+
     spectral_ref_upload = widgets.FileUpload(accept='.csv', multiple=False, description='Ref CSV:',
                                               layout=Layout(width='350px'))
     spectral_sample_upload = widgets.FileUpload(accept='.csv', multiple=False, description='Sample CSV:',
                                                  layout=Layout(width='350px'))
-    
+
     color_enhanced_section = VBox([
         HTMLWidget(value=f"<div style='{color_adv_style}'><h3 style='margin-top:0; color:#F39C12;'>🌈 Spectrophotometer Settings</h3></div>"),
         HTMLWidget(value="<p style='margin: 10px 0; color: #555;'><b>Instrument Configuration:</b></p>"),
@@ -2458,10 +2460,10 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         spectral_ref_upload,
         spectral_sample_upload
     ])
-    
+
     # Circle selector section
     circle_section = create_circle_selector_ui(settings, ref_img, test_img)
-    
+
     settings_panel = VBox([
         title_widget,
         operator_section,
@@ -2473,7 +2475,7 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         color_enhanced_section,
         circle_section
     ], layout=Layout(border='2px solid #2980B9', border_radius='10px', margin='20px 0'))
-    
+
     # Return both the panel and the widget references for value extraction
     widgets_dict = {
         'operator_name': operator_input,
@@ -2516,14 +2518,14 @@ def create_advanced_settings_ui(settings, ref_img, test_img):
         'spectral_ref_upload': spectral_ref_upload,
         'spectral_sample_upload': spectral_sample_upload
     }
-    
+
     return settings_panel, widgets_dict
 
 def create_circle_selector_ui(settings, ref_img, test_img):
     """Create interactive region selector for region of interest (circle or rectangle)"""
-    
+
     h, w = ref_img.shape[:2]
-    
+
     # Initialize crop parameters
     crop_enable = widgets.Checkbox(
         value=settings.use_crop,
@@ -2531,7 +2533,7 @@ def create_circle_selector_ui(settings, ref_img, test_img):
         style={'description_width': 'initial'},
         layout=Layout(width='300px')
     )
-    
+
     crop_shape = widgets.Dropdown(
         options=[('Circle', 'circle'), ('Rectangle', 'rectangle')],
         value=settings.crop_shape,
@@ -2539,45 +2541,45 @@ def create_circle_selector_ui(settings, ref_img, test_img):
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     crop_x = IntText(
         value=w // 2 if settings.crop_center_x == 0 else settings.crop_center_x,
         description='Center X (px):',
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     crop_y = IntText(
         value=h // 2 if settings.crop_center_y == 0 else settings.crop_center_y,
         description='Center Y (px):',
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     crop_diameter = IntText(
         value=settings.crop_diameter,
         description='Diameter (px):',
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     crop_width = IntText(
         value=settings.crop_width,
         description='Width (px):',
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     crop_height = IntText(
         value=settings.crop_height,
         description='Height (px):',
         style={'description_width': '180px'},
         layout=Layout(width='300px')
     )
-    
+
     # Preview output
     preview_output = Output()
-    
+
     def update_shape_visibility(change=None):
         """Update visibility of shape-specific controls"""
         if crop_shape.value == 'circle':
@@ -2589,31 +2591,31 @@ def create_circle_selector_ui(settings, ref_img, test_img):
             crop_width.layout.display = 'block'
             crop_height.layout.display = 'block'
         update_preview()
-    
+
     def update_preview(change=None):
         """Update image preview with crop region overlay"""
         with preview_output:
             preview_output.clear_output(wait=True)
-            
+
             if not crop_enable.value:
                 print("ℹ️ ROI selection is disabled. Full images will be processed.")
                 return
-            
+
             cx, cy = crop_x.value, crop_y.value
             shape = crop_shape.value
-            
+
             # Resize for display
             display_width = 400
             scale = display_width / w
             display_h = int(h * scale)
-            
+
             ref_display = cv2.resize(ref_img, (display_width, display_h))
             test_display = cv2.resize(test_img, (display_width, display_h))
-            
+
             # Scale crop parameters
             cx_scaled = int(cx * scale)
             cy_scaled = int(cy * scale)
-            
+
             # Draw crop region based on shape
             if shape == 'circle':
                 diam_scaled = int(crop_diameter.value * scale)
@@ -2626,23 +2628,23 @@ def create_circle_selector_ui(settings, ref_img, test_img):
                 ref_with_region = draw_rectangle_on_image(ref_display, cx_scaled, cy_scaled, width_scaled, height_scaled)
                 test_with_region = draw_rectangle_on_image(test_display, cx_scaled, cy_scaled, width_scaled, height_scaled)
                 shape_info = f"Rectangle ({crop_width.value}×{crop_height.value}px)"
-            
+
             # Combine side by side
             combined = np.hstack([ref_with_region, test_with_region])
-            
+
             # Display
             fig, ax = plt.subplots(figsize=(12, 5))
             ax.imshow(combined)
-            ax.set_title(f'Preview: Reference (Left) | Sample (Right) | {shape_info} @ ({cx}, {cy})', 
+            ax.set_title(f'Preview: Reference (Left) | Sample (Right) | {shape_info} @ ({cx}, {cy})',
                         fontsize=12, fontweight='bold', color='#2980B9')
             ax.axis('off')
-            ax.text(display_width // 2, -20, 'REFERENCE', ha='center', fontsize=10, 
+            ax.text(display_width // 2, -20, 'REFERENCE', ha='center', fontsize=10,
                    fontweight='bold', color='#27AE60')
-            ax.text(display_width + display_width // 2, -20, 'SAMPLE', ha='center', fontsize=10, 
+            ax.text(display_width + display_width // 2, -20, 'SAMPLE', ha='center', fontsize=10,
                    fontweight='bold', color='#E74C3C')
             plt.tight_layout()
             plt.show()
-    
+
     # Attach observers
     crop_enable.observe(update_preview, names='value')
     crop_shape.observe(update_shape_visibility, names='value')
@@ -2651,12 +2653,12 @@ def create_circle_selector_ui(settings, ref_img, test_img):
     crop_diameter.observe(update_preview, names='value')
     crop_width.observe(update_preview, names='value')
     crop_height.observe(update_preview, names='value')
-    
+
     # Initial display setup
     update_shape_visibility()
-    
+
     section_style = "background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #27AE60;"
-    
+
     crop_section = VBox([
         HTMLWidget(value=f"<div style='{section_style}'><h3 style='margin-top:0; color:#27AE60;'>🎯 Region of Interest Selection</h3></div>"),
         crop_enable,
@@ -2668,7 +2670,7 @@ def create_circle_selector_ui(settings, ref_img, test_img):
         HTMLWidget(value="<p style='margin: 10px 0; color: #777; font-size: 11px;'><i>💡 Tip: Image dimensions - Width: {}px, Height: {}px</i></p>".format(w, h)),
         preview_output
     ])
-    
+
     # Store widget references in settings for later extraction
     settings._crop_widgets = {
         'use_crop': crop_enable,
@@ -2679,7 +2681,7 @@ def create_circle_selector_ui(settings, ref_img, test_img):
         'crop_width': crop_width,
         'crop_height': crop_height
     }
-    
+
     return crop_section
 
 def extract_settings_from_widgets(settings, widgets_dict):
@@ -2698,20 +2700,20 @@ def extract_settings_from_widgets(settings, widgets_dict):
     settings.pattern_score_threshold = widgets_dict['pattern_score_threshold'].value
     settings.overall_score_threshold = widgets_dict['overall_score_threshold'].value
     settings.num_sample_points = widgets_dict['num_sample_points'].value
-    
+
     # Extract texture parameters
     settings.fft_num_peaks = widgets_dict['fft_num_peaks'].value
     settings.fft_enable_notch = widgets_dict['fft_enable_notch'].value
-    
+
     # Parse Gabor frequencies from text
     settings.gabor_frequencies_str = widgets_dict['gabor_frequencies_str'].value
     try:
         settings.gabor_frequencies = [float(x.strip()) for x in settings.gabor_frequencies_str.split(',')]
     except:
         settings.gabor_frequencies = [0.1, 0.2, 0.3]  # Default on error
-    
+
     settings.gabor_num_orientations = widgets_dict['gabor_num_orientations'].value
-    
+
     # Parse GLCM distances and angles from text
     settings.glcm_distances_str = widgets_dict['glcm_distances_str'].value
     settings.glcm_angles_str = widgets_dict['glcm_angles_str'].value
@@ -2723,7 +2725,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
         settings.glcm_angles = [int(x.strip()) for x in settings.glcm_angles_str.split(',')]
     except:
         settings.glcm_angles = [0, 45, 90, 135]  # Default on error
-    
+
     settings.lbp_points = widgets_dict['lbp_points'].value
     settings.lbp_radius = widgets_dict['lbp_radius'].value
     settings.wavelet_type = widgets_dict['wavelet_type'].value
@@ -2731,7 +2733,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
     settings.defect_min_area = widgets_dict['defect_min_area'].value
     settings.morph_kernel_size = widgets_dict['morph_kernel_size'].value
     settings.saliency_strength = widgets_dict['saliency_strength'].value
-    
+
     # Extract color enhanced parameters
     settings.observer_angle = widgets_dict['observer_angle'].value
     settings.geometry_mode = widgets_dict['geometry_mode'].value
@@ -2740,14 +2742,14 @@ def extract_settings_from_widgets(settings, widgets_dict):
     settings.whiteness_min = widgets_dict['whiteness_min'].value
     settings.yellowness_max = widgets_dict['yellowness_max'].value
     settings.metamerism_illuminants = list(widgets_dict['metamerism_illuminants'].value)
-    
+
     # Extract spectral data
     settings.spectral_enable = widgets_dict['spectral_enable'].value
-    
+
     # Process uploaded CSV files if present
     ref_upload = widgets_dict['spectral_ref_upload']
     sample_upload = widgets_dict['spectral_sample_upload']
-    
+
     if ref_upload.value:
         # Save uploaded file temporarily
         for filename, file_info in ref_upload.value.items():
@@ -2760,7 +2762,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
                 settings.spectral_ref_reflectance = ref
                 settings.spectral_ref_path = filename
                 print(f"✅ Loaded reference spectral data: {filename}")
-    
+
     if sample_upload.value:
         for filename, file_info in sample_upload.value.items():
             temp_path = f"/tmp/spectral_sample_{filename}"
@@ -2772,7 +2774,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
                 settings.spectral_sample_reflectance = ref
                 settings.spectral_sample_path = filename
                 print(f"✅ Loaded sample spectral data: {filename}")
-    
+
     # Extract crop settings if available
     if hasattr(settings, '_crop_widgets'):
         settings.use_crop = settings._crop_widgets['use_crop'].value
@@ -2782,7 +2784,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
         settings.crop_diameter = settings._crop_widgets['crop_diameter'].value
         settings.crop_width = settings._crop_widgets['crop_width'].value
         settings.crop_height = settings._crop_widgets['crop_height'].value
-    
+
     return settings
 
 # ----------------------------
@@ -2790,7 +2792,7 @@ def extract_settings_from_widgets(settings, widgets_dict):
 # ----------------------------
 def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
     """Main analysis pipeline with custom settings"""
-    
+
     # Apply crop if enabled (circle or rectangle)
     if settings.use_crop:
         ref = apply_crop(ref, settings)
@@ -2887,69 +2889,69 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
 
     # ============ ADVANCED TEXTURE ANALYSIS ============
     print("⚙️ Running advanced texture analysis...")
-    
+
     # FFT Analysis
     fft_ref = analyze_fft(gray_ref, num_peaks=settings.fft_num_peaks, enable_notch=settings.fft_enable_notch)
     fft_test = analyze_fft(gray_test, num_peaks=settings.fft_num_peaks, enable_notch=settings.fft_enable_notch)
-    
+
     # Gabor Filter Bank
     gabor_ref = analyze_gabor(gray_ref, frequencies=settings.gabor_frequencies, num_orientations=settings.gabor_num_orientations)
     gabor_test = analyze_gabor(gray_test, frequencies=settings.gabor_frequencies, num_orientations=settings.gabor_num_orientations)
-    
+
     # GLCM Features
     glcm_ref = analyze_glcm(gray_ref, distances=settings.glcm_distances, angles=settings.glcm_angles)
     glcm_test = analyze_glcm(gray_test, distances=settings.glcm_distances, angles=settings.glcm_angles)
-    
+
     # LBP
     lbp_ref = analyze_lbp(gray_ref, P=settings.lbp_points, R=settings.lbp_radius)
     lbp_test = analyze_lbp(gray_test, P=settings.lbp_points, R=settings.lbp_radius)
     lbp_chi2 = lbp_chi2_distance(lbp_ref['histogram'], lbp_test['histogram'])
     lbp_bhatt = lbp_bhattacharyya_distance(lbp_ref['histogram'], lbp_test['histogram'])
-    
+
     # Wavelet Analysis
     wavelet_ref = analyze_wavelet(gray_ref, wavelet=settings.wavelet_type, levels=settings.wavelet_levels)
     wavelet_test = analyze_wavelet(gray_test, wavelet=settings.wavelet_type, levels=settings.wavelet_levels)
-    
+
     # Structure Tensor
     struct_ref = analyze_structure_tensor(gray_ref)
     struct_test = analyze_structure_tensor(gray_test)
-    
+
     # HOG Density
     hog_ref = compute_hog_density(gray_ref)
     hog_test = compute_hog_density(gray_test)
-    
+
     # GLCM Z-scores
     glcm_zscores = compute_glcm_zscores(glcm_ref, glcm_test)
-    
+
     # Defect Detection
-    defects_analysis = analyze_defects(gray_test, min_area=settings.defect_min_area, 
+    defects_analysis = analyze_defects(gray_test, min_area=settings.defect_min_area,
                                        morph_kernel_size=settings.morph_kernel_size,
                                        saliency_strength=settings.saliency_strength)
-    
+
     # ============ ENHANCED COLOR ANALYSIS ============
     print("🎨 Running enhanced color analysis...")
-    
+
     # Check if spectral data is provided
-    spectral_data_available = (settings.spectral_enable and 
-                               len(settings.spectral_ref_wavelengths) > 0 and 
+    spectral_data_available = (settings.spectral_enable and
+                               len(settings.spectral_ref_wavelengths) > 0 and
                                len(settings.spectral_sample_wavelengths) > 0)
-    
+
     if spectral_data_available:
         print("📊 Processing spectral data...")
         # Use spectral data to compute XYZ
-        xyz_ref_spectral = spectral_to_xyz(settings.spectral_ref_wavelengths, 
+        xyz_ref_spectral = spectral_to_xyz(settings.spectral_ref_wavelengths,
                                            settings.spectral_ref_reflectance)
-        xyz_test_spectral = spectral_to_xyz(settings.spectral_sample_wavelengths, 
+        xyz_test_spectral = spectral_to_xyz(settings.spectral_sample_wavelengths,
                                             settings.spectral_sample_reflectance)
-        
+
         # Override mean XYZ with spectral data
         xyz_ref_mean = xyz_ref_spectral
         xyz_test_mean = xyz_test_spectral
-        
+
         # Find spectral peaks and valleys
-        spectral_features_ref = find_spectral_peaks_valleys(settings.spectral_ref_wavelengths, 
+        spectral_features_ref = find_spectral_peaks_valleys(settings.spectral_ref_wavelengths,
                                                             settings.spectral_ref_reflectance)
-        spectral_features_sample = find_spectral_peaks_valleys(settings.spectral_sample_wavelengths, 
+        spectral_features_sample = find_spectral_peaks_valleys(settings.spectral_sample_wavelengths,
                                                                settings.spectral_sample_reflectance)
     else:
         # Use RGB-derived XYZ
@@ -2957,7 +2959,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
         xyz_test_mean = xyz_test_D65.reshape(-1, 3).mean(axis=0)
         spectral_features_ref = []
         spectral_features_sample = []
-    
+
     # CMC Color Difference
     if settings.use_delta_e_cmc:
         l_val, c_val = (2, 1) if settings.cmc_l_c_ratio == "2:1" else (1, 1)
@@ -2968,20 +2970,20 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
         mean_de_cmc = 0.0
     whiteness_ref, tint_ref = cie_whiteness_tint(xyz_ref_mean)
     whiteness_test, tint_test = cie_whiteness_tint(xyz_test_mean)
-    
+
     # Yellowness Index
     yi_ref = astm_e313_yellowness(xyz_ref_mean)
     yi_test = astm_e313_yellowness(xyz_test_mean)
-    
+
     # Extended Metamerism Analysis
     metamerism_results = []
     for ill_name in settings.metamerism_illuminants:
         if ill_name in WHITE_POINTS:
             _, _, de00_ill, _, _, _ = mean_de_under(ill_name)
             metamerism_results.append({'illuminant': ill_name, 'delta_e': de00_ill})
-    
+
     worst_metamerism = max(metamerism_results, key=lambda x: x['delta_e']) if metamerism_results else None
-    
+
     # QC metrics (using settings)
     color_score = max(0.0, 100.0 - mean76 * settings.color_score_multiplier)  # ΔE76 -> score
     pattern_score = ssim_score * 100.0
@@ -3028,43 +3030,43 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
     thr_img_path  = os.path.join(TMP_IMG_DIR, "defect_mask.png")
     Image.fromarray(diff).save(diff_img_path, "PNG")
     Image.fromarray(thr).save(thr_img_path, "PNG")
-    
+
     # ============ ADVANCED TEXTURE VISUALIZATIONS ============
     # FFT Power Spectrum
     fft_spectrum_path = os.path.join(TMP_IMG_DIR, "fft_power_spectrum.png")
     plot_fft_power_spectrum(fft_test['power_spectrum'], fft_test['peaks'], fft_spectrum_path)
-    
+
     # Gabor Montage
     gabor_montage_path = os.path.join(TMP_IMG_DIR, "gabor_montage.png")
-    plot_gabor_montage(gabor_test['energy_maps'], settings.gabor_frequencies, 
+    plot_gabor_montage(gabor_test['energy_maps'], settings.gabor_frequencies,
                        settings.gabor_num_orientations, gabor_montage_path)
-    
+
     # Gabor Orientation Histogram
     gabor_orient_path = os.path.join(TMP_IMG_DIR, "gabor_orientation.png")
     plot_gabor_orientation_histogram(gabor_test['results'], gabor_orient_path)
-    
+
     # GLCM Radar Chart
     glcm_radar_path = os.path.join(TMP_IMG_DIR, "glcm_radar.png")
     plot_glcm_radar(glcm_ref, glcm_test, glcm_radar_path)
-    
+
     # LBP Map and Histogram
     lbp_map_hist_path = os.path.join(TMP_IMG_DIR, "lbp_map_hist.png")
     plot_lbp_map_and_hist(lbp_test['lbp_map'], lbp_ref['histogram'], lbp_test['histogram'], lbp_map_hist_path)
-    
+
     # Wavelet Energy Bars
     wavelet_energy_path = os.path.join(TMP_IMG_DIR, "wavelet_energy.png")
     plot_wavelet_energy_bars(wavelet_ref['energies'], wavelet_test['energies'], wavelet_energy_path)
-    
+
     # Defect Saliency Map
     defect_saliency_path = os.path.join(TMP_IMG_DIR, "defect_saliency.png")
-    plot_defect_saliency(defects_analysis['saliency_map'], defects_analysis['binary_map'], 
+    plot_defect_saliency(defects_analysis['saliency_map'], defects_analysis['binary_map'],
                          defects_analysis['defects'], gray_test.shape, defect_saliency_path)
-    
+
     # Line-Angle Histogram (Structure Tensor)
     line_angle_hist_path = os.path.join(TMP_IMG_DIR, "line_angle_histogram.png")
     if len(struct_test['orientation_degrees']) > 0:
         plot_line_angle_histogram(struct_test['orientation_degrees'], line_angle_hist_path)
-    
+
     # ============ ENHANCED COLOR VISUALIZATIONS ============
     # Metamerism across illuminants
     metamerism_plot_path = os.path.join(TMP_IMG_DIR, "metamerism_illuminants.png")
@@ -3072,7 +3074,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
         illuminant_names = [m['illuminant'] for m in metamerism_results]
         illuminant_des = [m['delta_e'] for m in metamerism_results]
         plot_metamerism_illuminants(illuminant_names, illuminant_des, metamerism_plot_path)
-    
+
     # True Spectral Curve (if available)
     spectral_curve_path = os.path.join(TMP_IMG_DIR, "spectral_curve.png")
     if spectral_data_available:
@@ -3125,7 +3127,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
     elements.append(t)
     elements.append(Spacer(1, 24))
     elements.append(PageBreak())
-    
+
     # ==== ANALYSIS SETTINGS ====
     if settings.enable_analysis_settings:
         elements.append(Paragraph("<b>Analysis Settings</b>", StyleH1))
@@ -3340,25 +3342,25 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                      RLImage(hist_test_path, width=3.2*inch, height=1.6*inch)]]
         elements.append(Table(hist_row, colWidths=[3.3*inch,3.3*inch]))
         elements.append(Spacer(1, 8))
-        
+
         # ==== ADVANCED TEXTURE ANALYSIS ====
         if settings.enable_pattern_advanced:
             elements.append(PageBreak())
             elements.append(Paragraph("<b>Advanced Texture Analysis</b>", StyleH1))
-            
+
             # A. FFT / Fourier Domain
             elements.append(Paragraph("Fourier Domain Analysis", StyleH2))
             elements.append(Paragraph("2D Fast Fourier Transform reveals periodic structures and directional patterns in the fabric.", StyleSmall))
             elements.append(RLImage(fft_spectrum_path, width=5*inch, height=3.5*inch))
             elements.append(Spacer(1, 6))
-            
+
             # FFT Peaks Table
             fft_peak_tbl = [["Peak", "Radius", "Angle (°)", "Magnitude"]]
             for i, peak in enumerate(fft_test['peaks'][:5], start=1):
                 fft_peak_tbl.append([f"P{i}", fmt2(peak['radius']), fmt2(peak['angle']), fmt2(peak['magnitude'])])
             elements.append(make_table(fft_peak_tbl, colWidths=[1.0*inch, 1.5*inch, 1.5*inch, 1.5*inch]))
             elements.append(Spacer(1, 6))
-            
+
             # FFT Metrics
             fft_metrics_tbl = [["Metric", "Reference", "Sample"],
                                ["Fundamental Period (px)", fmt2(fft_ref['fundamental_period']), fmt2(fft_test['fundamental_period'])],
@@ -3366,7 +3368,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                                ["Anisotropy Ratio", fmt2(fft_ref['anisotropy']), fmt2(fft_test['anisotropy'])]]
             elements.append(make_table(fft_metrics_tbl, colWidths=[2.5*inch, 1.5*inch, 1.5*inch]))
             elements.append(Spacer(1, 12))
-            
+
             # B. Gabor Filter Bank
             elements.append(Paragraph("Gabor Filter Bank Analysis", StyleH2))
             elements.append(Paragraph("Multi-scale and multi-orientation responses capture texture at different frequencies and angles.", StyleSmall))
@@ -3374,23 +3376,23 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
             elements.append(Spacer(1, 6))
             elements.append(RLImage(gabor_orient_path, width=4.5*inch, height=3*inch))
             elements.append(Spacer(1, 6))
-            
+
             # Gabor Statistics
             gabor_stats_tbl = [["Metric", "Reference", "Sample", "Δ"]]
-            gabor_stats_tbl.append(["Dominant Orientation (°)", fmt2(gabor_ref['dominant_orientation']), 
+            gabor_stats_tbl.append(["Dominant Orientation (°)", fmt2(gabor_ref['dominant_orientation']),
                                     fmt2(gabor_test['dominant_orientation']),
                                     fmt2(abs(gabor_ref['dominant_orientation'] - gabor_test['dominant_orientation']))])
             gabor_stats_tbl.append(["Coherency", fmt2(gabor_ref['coherency']), fmt2(gabor_test['coherency']),
                                     fmt2(abs(gabor_ref['coherency'] - gabor_test['coherency']))])
             elements.append(make_table(gabor_stats_tbl, colWidths=[2.0*inch, 1.5*inch, 1.5*inch, 1.0*inch]))
             elements.append(Spacer(1, 12))
-            
+
             # C. GLCM / Haralick Features
             elements.append(Paragraph("GLCM Texture Features", StyleH2))
             elements.append(Paragraph("Gray Level Co-occurrence Matrix (GLCM) quantifies spatial relationships in texture.", StyleSmall))
             elements.append(RLImage(glcm_radar_path, width=5*inch, height=5*inch))
             elements.append(Spacer(1, 6))
-            
+
             # GLCM Summary Table with Z-scores
             glcm_summary = [["Feature", "Reference", "Sample", "Δ", "z-score", "Interp."]]
             for feat in glcm_ref.keys():
@@ -3403,30 +3405,30 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                     z_interp = "Moderate"
                 else:
                     z_interp = "Significant"
-                glcm_summary.append([feat.capitalize(), fmt2(glcm_ref[feat]), fmt2(glcm_test[feat]), 
+                glcm_summary.append([feat.capitalize(), fmt2(glcm_ref[feat]), fmt2(glcm_test[feat]),
                                     fmt2(delta), fmt2(z), z_interp])
             elements.append(make_table(glcm_summary, colWidths=[1.0*inch, 1.0*inch, 1.0*inch, 0.7*inch, 0.8*inch, 1.0*inch]))
             elements.append(Spacer(1, 12))
-            
+
             # D. LBP (Local Binary Patterns)
             elements.append(Paragraph("Local Binary Patterns (LBP)", StyleH2))
             elements.append(Paragraph("LBP captures local texture by encoding pixel neighborhoods into binary patterns.", StyleSmall))
             elements.append(RLImage(lbp_map_hist_path, width=6.5*inch, height=3*inch))
             elements.append(Spacer(1, 6))
-            
+
             # LBP Similarity Metrics
             lbp_sim_tbl = [["Metric", "Value", "Interpretation"],
                            ["χ² Distance", fmt2(lbp_chi2), "Lower is more similar"],
                            ["Bhattacharyya Distance", fmt2(lbp_bhatt), "Lower is more similar"]]
             elements.append(make_table(lbp_sim_tbl, colWidths=[2.5*inch, 1.5*inch, 2.0*inch]))
             elements.append(Spacer(1, 12))
-            
+
             # E. Wavelet Multiresolution
             elements.append(Paragraph("Wavelet Decomposition", StyleH2))
             elements.append(Paragraph(f"Multiresolution analysis using {settings.wavelet_type} wavelet at {settings.wavelet_levels} levels.", StyleSmall))
             elements.append(RLImage(wavelet_energy_path, width=6.5*inch, height=5*inch))
             elements.append(Spacer(1, 6))
-            
+
             # Wavelet Energy Table
             wavelet_tbl = [["Level", "Band", "Ref Energy", "Sample Energy", "Ratio"]]
             for i, (e_ref, e_test) in enumerate(zip(wavelet_ref['energies'], wavelet_test['energies'])):
@@ -3435,7 +3437,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                     wavelet_tbl.append([str(e_ref['level']), band, f"{e_ref[band]:.1e}", f"{e_test[band]:.1e}", fmt2(ratio)])
             elements.append(make_table(wavelet_tbl, colWidths=[0.8*inch, 0.8*inch, 1.5*inch, 1.5*inch, 1.0*inch]))
             elements.append(Spacer(1, 12))
-            
+
             # F. Structure Tensor & Coherency
             elements.append(Paragraph("Structure Tensor Analysis", StyleH2))
             struct_coherency_tbl = [["Metric", "Reference", "Sample"],
@@ -3443,20 +3445,20 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                                     ["HOG Edge Density", fmt2(hog_ref['edge_density']), fmt2(hog_test['edge_density'])]]
             elements.append(make_table(struct_coherency_tbl, colWidths=[2.5*inch, 1.5*inch, 1.5*inch]))
             elements.append(Spacer(1, 6))
-            
+
             # Line-Angle Histogram
             if len(struct_test['orientation_degrees']) > 0:
                 elements.append(Paragraph("Line Angle Distribution", StyleH2))
                 elements.append(Paragraph("Histogram showing dominant line orientations in the fabric structure.", StyleSmall))
                 elements.append(RLImage(line_angle_hist_path, width=5.5*inch, height=3*inch))
             elements.append(Spacer(1, 12))
-            
+
             # G. Defect Detection & Saliency
             elements.append(Paragraph("Defect Detection & Saliency Map", StyleH2))
             elements.append(Paragraph("Spectral residual saliency combined with morphological operations identifies potential defects.", StyleSmall))
             elements.append(RLImage(defect_saliency_path, width=6.5*inch, height=3*inch))
             elements.append(Spacer(1, 6))
-            
+
             # Defect Catalog
             if defects_analysis['defects']:
                 defect_catalog = [["ID", "Type", "Area (px²)", "Bounding Box (x0,y0,x1,y1)"]]
@@ -3468,12 +3470,12 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
             else:
                 elements.append(Paragraph("No significant defects detected.", StyleBody))
             elements.append(Spacer(1, 12))
-    
+
     # ==== SPECTROPHOTOMETER-LIKE COLOR MODULE (New Page) ====
     if settings.enable_spectrophotometer:
         elements.append(PageBreak())
         elements.append(Paragraph("<b>Spectrophotometer Simulation</b>", StyleH1))
-        
+
         # Instrument Metadata
         if settings.enable_spectro_config:
             elements.append(Paragraph("Instrument Configuration", StyleH2))
@@ -3484,7 +3486,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                          ["UV Control", settings.uv_control_note]]
             elements.append(make_table(inst_meta, colWidths=[2.5*inch, 3.5*inch]))
             elements.append(Spacer(1, 12))
-        
+
         # Enhanced Color Difference Suite
         if settings.enable_spectro_color_diff_methods:
             elements.append(Paragraph("Color Difference Methods", StyleH2))
@@ -3497,7 +3499,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                 color_diff_suite.append([f"ΔE CMC ({settings.cmc_l_c_ratio})", fmt2(mean_de_cmc), cmc_status])
             elements.append(make_table(color_diff_suite, colWidths=[2.5*inch, 1.5*inch, 1.5*inch]))
             elements.append(Spacer(1, 12))
-        
+
         # Whiteness & Yellowness Indices
         if settings.enable_spectro_whiteness:
             elements.append(Paragraph("Whiteness & Yellowness Indices", StyleH2))
@@ -3509,7 +3511,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
             wy_tbl.append(["Yellowness Index (ASTM E313)", fmt2(yi_ref), fmt2(yi_test), f"≤ {settings.yellowness_max}", y_status])
             elements.append(make_table(wy_tbl, colWidths=[2.2*inch, 1.2*inch, 1.2*inch, 1.0*inch, 0.8*inch]))
             elements.append(Spacer(1, 12))
-        
+
         # Metamerism Analysis
         if settings.enable_spectro_metamerism:
             elements.append(Paragraph("Metamerism Analysis", StyleH2))
@@ -3520,19 +3522,19 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                 metamerism_plot_group.append(RLImage(metamerism_plot_path, width=5.5*inch, height=3.5*inch))
                 metamerism_plot_group.append(Spacer(1, 6))
                 elements.append(KeepTogether(metamerism_plot_group))
-                
+
                 # Illuminant ΔE Table
                 meta_tbl = [["Illuminant", "ΔE2000", "Status"]]
                 for m in metamerism_results:
                     m_status = "PASS" if m['delta_e'] < 2.0 else ("CONDITIONAL" if m['delta_e'] < 3.5 else "FAIL")
                     meta_tbl.append([m['illuminant'], fmt2(m['delta_e']), m_status])
                 elements.append(make_table(meta_tbl, colWidths=[2.0*inch, 1.5*inch, 1.5*inch]))
-                
+
                 if worst_metamerism:
                     elements.append(Spacer(1, 6))
                     elements.append(Paragraph(f"<b>Worst-case metamerism:</b> {worst_metamerism['illuminant']} (ΔE = {fmt2(worst_metamerism['delta_e'])})", StyleBody))
             elements.append(Spacer(1, 12))
-        
+
         # True Spectral Data Analysis (if available)
         if settings.enable_spectro_spectral_data and spectral_data_available:
             spectral_section = []
@@ -3541,7 +3543,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
             spectral_section.append(RLImage(spectral_curve_path, width=6*inch, height=4*inch))
             spectral_section.append(Spacer(1, 6))
             elements.append(KeepTogether(spectral_section))
-            
+
             # Spectral Peak/Valley Table
             if spectral_features_ref or spectral_features_sample:
                 peak_valley_tbl = [["Sample", "Type", "Wavelength (nm)", "Reflectance (%)"]]
@@ -3550,11 +3552,11 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
                 for feat in spectral_features_sample[:3]:
                     peak_valley_tbl.append(["Sample", feat['type'], fmt1(feat['wavelength']), fmt1(feat['reflectance'])])
                 elements.append(make_table(peak_valley_tbl, colWidths=[1.5*inch, 1.0*inch, 1.5*inch, 1.5*inch]))
-            
+
             elements.append(Spacer(1, 6))
             elements.append(Paragraph("<i>Note: Tristimulus values computed from spectral data using CIE color matching functions.</i>", StyleSmall))
             elements.append(Spacer(1, 12))
-        
+
         # Calibration Notes
         if settings.enable_spectro_calibration:
             elements.append(Paragraph("Calibration & Limitations", StyleH2))
@@ -3593,7 +3595,7 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
         ]
     conclusion_elements.append(Paragraph("• " + "<br/>• ".join(concl), StyleBody))
     conclusion_elements.append(Spacer(1, 12))
-    
+
     # Wrap conclusion in KeepTogether to prevent page break
     elements.append(KeepTogether(conclusion_elements))
 
@@ -3608,16 +3610,16 @@ def run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings):
 def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     """Generate a compact technical report with analysis settings (small text for technicians)"""
     from datetime import datetime, timedelta
-    
+
     # Use UTC+3 timestamp (matching main report)
     tz_offset = timedelta(hours=TIMEZONE_OFFSET_HOURS)
     now_utc3 = datetime.utcnow() + tz_offset
     timestamp_str = now_utc3.strftime("%Y%m%d_%H%M%S")
     pdf_path = f"Analysis_Settings_Report_{timestamp_str}.pdf"
-    
+
     # Store the main report name that would be generated
     main_report_name = f"QC_Report_{timestamp_str}.pdf"
-    
+
     # Create PDF with smaller margins for compact layout
     doc = SimpleDocTemplate(
         pdf_path,
@@ -3627,12 +3629,12 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         topMargin=60,
         bottomMargin=60
     )
-    
+
     elements = []
-    
+
     # Define styles for small text (technical report)
     styles = getSampleStyleSheet()
-    
+
     # Small title style
     StyleTitle = ParagraphStyle(
         'TechTitle',
@@ -3643,7 +3645,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         alignment=1,  # Center
         fontName='Helvetica-Bold'
     )
-    
+
     # Small heading style
     StyleHeading = ParagraphStyle(
         'TechHeading',
@@ -3654,7 +3656,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         spaceBefore=10,
         fontName='Helvetica-Bold'
     )
-    
+
     # Small body text style
     StyleBody = ParagraphStyle(
         'TechBody',
@@ -3664,13 +3666,13 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         spaceAfter=4,
         fontName='Helvetica'
     )
-    
+
     # Title
     elements.append(Paragraph("⚙️ ANALYSIS SETTINGS TECHNICAL REPORT", StyleTitle))
-    elements.append(Paragraph(f"<b>Operator:</b> {settings.operator_name} | <b>Timestamp (UTC+3):</b> {now_utc3.strftime('%Y-%m-%d %H:%M:%S')}", 
+    elements.append(Paragraph(f"<b>Operator:</b> {settings.operator_name} | <b>Timestamp (UTC+3):</b> {now_utc3.strftime('%Y-%m-%d %H:%M:%S')}",
                              ParagraphStyle('TechSubtitle', parent=StyleBody, fontSize=8, alignment=1, spaceAfter=10)))
     elements.append(Spacer(1, 10))
-    
+
     # Logo (if available)
     logo_path = "logo_vertical_512x256.png"
     if os.path.exists(logo_path):
@@ -3680,7 +3682,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
             elements.append(Spacer(1, 8))
         except:
             pass
-    
+
     # ===== REPORT METADATA =====
     elements.append(Paragraph("Report Information", StyleHeading))
     report_info_data = [
@@ -3693,7 +3695,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ["Sample Image", os.path.basename(test_path)],
         ["Image Dimensions", f"{ref.shape[1]} × {ref.shape[0]} pixels"],
     ]
-    
+
     report_info_table = Table(report_info_data, colWidths=[2.5*inch, 4.5*inch])
     report_info_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), BLUE2),
@@ -3714,10 +3716,10 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     ]))
     elements.append(report_info_table)
     elements.append(Spacer(1, 10))
-    
+
     # ===== REGION ANALYSIS DETAILS =====
     elements.append(Paragraph("Region Analysis Configuration", StyleHeading))
-    
+
     if settings.use_crop:
         analysis_mode = f"Selected Region Only ({settings.crop_shape.upper()})"
         if settings.crop_shape == "circle":
@@ -3727,14 +3729,14 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     else:
         analysis_mode = "Entire Image (No Region Selection)"
         shape_details = "N/A - Full image analyzed"
-    
+
     region_data = [
         ["Configuration", "Details"],
         ["Analysis Mode", analysis_mode],
         ["Shape Details", shape_details],
         ["Sample Points", f"{settings.num_sample_points} points"],
     ]
-    
+
     region_table = Table(region_data, colWidths=[2.5*inch, 4.5*inch])
     region_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), GREEN),
@@ -3755,10 +3757,10 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     ]))
     elements.append(region_table)
     elements.append(Spacer(1, 10))
-    
+
     # ===== ENABLED/DISABLED SECTIONS =====
     elements.append(Paragraph("Report Sections Included", StyleHeading))
-    
+
     sections_status = [
         ["Section", "Status"],
         # Main sections
@@ -3766,7 +3768,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ["🎨 Color Unit", "✓ Enabled" if settings.enable_color_unit else "✗ Disabled"],
         # Color sub-sections (only show if Color Unit enabled)
     ]
-    
+
     if settings.enable_color_unit:
         sections_status.extend([
             ["  ├─ Input Images", "✓ Enabled" if settings.enable_color_input_images else "✗ Disabled"],
@@ -3781,9 +3783,9 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
             ["  ├─ Scoring & Status", "✓ Enabled" if settings.enable_color_scoring else "✗ Disabled"],
             ["  └─ Recommendations", "✓ Enabled" if settings.enable_color_recommendations else "✗ Disabled"],
         ])
-    
+
     sections_status.append(["🔲 Pattern Unit", "✓ Enabled" if settings.enable_pattern_unit else "✗ Disabled"])
-    
+
     if settings.enable_pattern_unit:
         sections_status.extend([
             ["  ├─ SSIM Analysis", "✓ Enabled" if settings.enable_pattern_ssim else "✗ Disabled"],
@@ -3792,9 +3794,9 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
             ["  ├─ Repeat Period", "✓ Enabled" if settings.enable_pattern_repeat else "✗ Disabled"],
             ["  └─ Advanced Texture", "✓ Enabled" if settings.enable_pattern_advanced else "✗ Disabled"],
         ])
-    
+
     sections_status.append(["🔬 Spectrophotometer", "✓ Enabled" if settings.enable_spectrophotometer else "✗ Disabled"])
-    
+
     if settings.enable_spectrophotometer:
         sections_status.extend([
             ["  ├─ Instrument Config", "✓ Enabled" if settings.enable_spectro_config else "✗ Disabled"],
@@ -3804,7 +3806,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
             ["  ├─ Spectral Data", "✓ Enabled" if settings.enable_spectro_spectral_data else "✗ Disabled"],
             ["  └─ Calibration Notes", "✓ Enabled" if settings.enable_spectro_calibration else "✗ Disabled"],
         ])
-    
+
     sections_table = Table(sections_status, colWidths=[4.5*inch, 2.5*inch])
     sections_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), ORANGE),
@@ -3824,11 +3826,11 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     ]))
     elements.append(sections_table)
     elements.append(Spacer(1, 10))
-    
+
     # ===== TWO-COLUMN LAYOUT FOR SETTINGS =====
     elements.append(PageBreak())
     elements.append(Paragraph("Detailed Analysis Parameters", StyleHeading))
-    
+
     # Create TWO-COLUMN layout for settings (left and right tables)
     # LEFT COLUMN - Color & Pattern Settings
     left_settings = [
@@ -3857,7 +3859,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ["GLCM Distances", settings.glcm_distances_str],
         ["GLCM Angles", settings.glcm_angles_str],
     ]
-    
+
     # RIGHT COLUMN - Spectrophotometer & Advanced Settings
     right_settings = [
         ["Parameter", "Value"],
@@ -3880,7 +3882,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ["Saliency Strength", f"{settings.saliency_strength}"],
         ["Morph Kernel Size", f"{settings.morph_kernel_size}"],
     ]
-    
+
     # Create left table
     left_table = Table(left_settings, colWidths=[1.8*inch, 1.4*inch])
     left_table.setStyle(TableStyle([
@@ -3907,7 +3909,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ('WORDWRAP', (0, 0), (-1, -1), True),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
-    
+
     # Create right table
     right_table = Table(right_settings, colWidths=[1.8*inch, 1.4*inch])
     right_table.setStyle(TableStyle([
@@ -3930,7 +3932,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ('WORDWRAP', (0, 0), (-1, -1), True),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
     ]))
-    
+
     # Place tables side-by-side
     two_column_layout = Table([[left_table, right_table]], colWidths=[3.4*inch, 3.4*inch])
     two_column_layout.setStyle(TableStyle([
@@ -3939,14 +3941,14 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
     ]))
-    
+
     elements.append(two_column_layout)
     elements.append(Spacer(1, 12))
-    
+
     # Input Images (smaller size for compact layout)
     elements.append(PageBreak())
     elements.append(Paragraph("Input Images", StyleHeading))
-    
+
     # Reference image
     ref_temp = "temp_ref_tech.png"
     Image.fromarray(ref).save(ref_temp)
@@ -3954,7 +3956,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     elements.append(Paragraph("<b>Reference Image:</b>", StyleBody))
     elements.append(ref_img)
     elements.append(Spacer(1, 8))
-    
+
     # Test image
     test_temp = "temp_test_tech.png"
     Image.fromarray(test).save(test_temp)
@@ -3962,49 +3964,49 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
     elements.append(Paragraph("<b>Sample Image:</b>", StyleBody))
     elements.append(test_img)
     elements.append(Spacer(1, 8))
-    
+
     # File info
     elements.append(Paragraph(f"<b>Reference File:</b> {os.path.basename(ref_path)}", StyleBody))
     elements.append(Paragraph(f"<b>Sample File:</b> {os.path.basename(test_path)}", StyleBody))
     elements.append(Paragraph(f"<b>Image Size:</b> {ref.shape[1]}×{ref.shape[0]} pixels", StyleBody))
-    
+
     # Footer note
     elements.append(Spacer(1, 15))
-    elements.append(Paragraph("<i>This is a technical report for internal use by technicians. Contains detailed analysis configuration.</i>", 
+    elements.append(Paragraph("<i>This is a technical report for internal use by technicians. Contains detailed analysis configuration.</i>",
                              ParagraphStyle('TechFootnote', parent=StyleBody, fontSize=6, textColor=colors.grey, alignment=1)))
-    
+
     # Build PDF with simplified header/footer
     def tech_header_footer(canvas, doc):
         canvas.saveState()
-        
+
         # Header line
         canvas.setStrokeColor(BLUE2)
         canvas.setLineWidth(1)
         canvas.line(30, A4[1] - 40, A4[0] - 30, A4[1] - 40)
-        
+
         # Footer
         canvas.setFont('Helvetica', 7)
         canvas.setFillColor(colors.grey)
         canvas.drawString(30, 30, f"Analysis Settings Report | {settings.operator_name}")
         canvas.drawRightString(A4[0] - 30, 30, f"Page {doc.page}")
-        
+
         # Logo in footer (if available)
         if os.path.exists(logo_path):
             try:
                 canvas.drawImage(logo_path, A4[0] - 60, 20, width=24, height=12, preserveAspectRatio=True, mask='auto')
             except:
                 pass
-        
+
         canvas.restoreState()
-    
+
     doc.build(elements, onFirstPage=tech_header_footer, onLaterPages=tech_header_footer)
-    
+
     # Clean up temp files
     if os.path.exists(ref_temp):
         os.remove(ref_temp)
     if os.path.exists(test_temp):
         os.remove(test_temp)
-    
+
     return pdf_path
 
 # ----------------------------
@@ -4012,7 +4014,7 @@ def generate_analysis_settings_report(ref_path, test_path, ref, test, settings):
 # ----------------------------
 def main():
     """Main interactive workflow"""
-    
+
     # Step 1: Upload images
     print("=" * 60)
     print("🎨 TEXTILE QUALITY CONTROL SYSTEM")
@@ -4021,25 +4023,25 @@ def main():
     ref = read_rgb(ref_path)
     test = read_rgb(test_path)
     ref, test = to_same_size(ref, test)
-    
+
     print("\n✅ Images uploaded successfully!")
     print(f"   Reference: {os.path.basename(ref_path)} ({ref.shape[1]}x{ref.shape[0]})")
     print(f"   Sample: {os.path.basename(test_path)} ({test.shape[1]}x{test.shape[0]})")
-    
+
     # Initialize default settings
     settings = QCSettings()
     settings_ui_widgets = None
-    
+
     # Create output areas
     settings_output = Output()
     processing_output = Output()
-    
+
     # Step 2: Show action buttons
     clear_output(wait=False)
-    
+
     # Professional header
     header_html = """
-    <div style='background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%); 
+    <div style='background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%);
                 padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
         <h1 style='color: white; margin: 0; font-family: Arial, sans-serif; font-size: 32px;'>
@@ -4050,7 +4052,7 @@ def main():
         </p>
     </div>
     """
-    
+
     info_html = f"""
     <div style='background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;
                 border-left: 5px solid #27AE60;'>
@@ -4059,10 +4061,10 @@ def main():
         <p style='margin: 5px 0;'><strong>Sample:</strong> {os.path.basename(test_path)} ({test.shape[1]}×{test.shape[0]} pixels)</p>
     </div>
     """
-    
+
     display(HTMLWidget(value=header_html))
     display(HTMLWidget(value=info_html))
-    
+
     # Action buttons
     btn_start = Button(
         description='🚀 Start Processing',
@@ -4070,40 +4072,40 @@ def main():
         layout=Layout(width='250px', height='50px'),
         style={'button_color': '#27AE60', 'font_weight': 'bold'}
     )
-    
+
     btn_advanced = Button(
         description='⚙️ Advanced Settings',
         button_style='info',
         layout=Layout(width='250px', height='50px'),
         style={'button_color': '#2980B9', 'font_weight': 'bold'}
     )
-    
+
     btn_report_sections = Button(
         description='📋 Report Sections',
         button_style='warning',
         layout=Layout(width='250px', height='50px'),
         style={'button_color': '#F39C12', 'font_weight': 'bold'}
     )
-    
+
     buttons_box = HBox(
         [btn_start, btn_advanced, btn_report_sections],
         layout=Layout(justify_content='center', margin='20px 0')
     )
-    
+
     display(buttons_box)
     display(settings_output)
     display(processing_output)
-    
+
     # Handler for Advanced Settings button
     def on_advanced_clicked(b):
         nonlocal settings_ui_widgets
         with settings_output:
             settings_output.clear_output()
-            
+
             # Create settings UI
             panel, widgets_dict = create_advanced_settings_ui(settings, ref, test)
             settings_ui_widgets = widgets_dict
-            
+
             # Create Apply and Process button
             btn_apply_process = Button(
                 description='✅ Apply Settings & Start Processing',
@@ -4111,43 +4113,43 @@ def main():
                 layout=Layout(width='400px', height='50px', margin='20px 0'),
                 style={'button_color': '#27AE60', 'font_weight': 'bold'}
             )
-            
+
             def on_apply_process_clicked(b):
                 # Extract settings from widgets
                 extract_settings_from_widgets(settings, settings_ui_widgets)
-                
+
                 with processing_output:
                     processing_output.clear_output()
                     print("⏳ Processing with custom settings...")
-                    
+
                 # Hide buttons and settings
                 buttons_box.layout.display = 'none'
                 settings_output.clear_output()
-                
+
                 # Run pipeline
                 run_analysis(ref_path, test_path, ref, test, settings, processing_output)
-            
+
             btn_apply_process.on_click(on_apply_process_clicked)
-            
+
             display(panel)
             display(HBox([btn_apply_process], layout=Layout(justify_content='center')))
-    
+
     # Handler for Start Processing button (with defaults)
     def on_start_clicked(b):
         buttons_box.layout.display = 'none'
         with processing_output:
             processing_output.clear_output()
             print("⏳ Processing with default settings...")
-        
+
         run_analysis(ref_path, test_path, ref, test, settings, processing_output)
-    
+
     # Handler for Report Sections button
     def on_report_sections_clicked(b):
         with settings_output:
             settings_output.clear_output()
             panel = create_report_sections_ui(settings)
             display(panel)
-    
+
     btn_advanced.on_click(on_advanced_clicked)
     btn_report_sections.on_click(on_report_sections_clicked)
     btn_start.on_click(on_start_clicked)
@@ -4156,10 +4158,10 @@ def run_analysis(ref_path, test_path, ref, test, settings, output_widget):
     """Run the analysis pipeline and display results"""
     with output_widget:
         output_widget.clear_output(wait=True)
-        
+
         # Show progress
         progress_html = """
-        <div style='background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%); 
+        <div style='background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
                     padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;'>
             <h2 style='color: white; margin: 0;'>⚙️ Analysis in Progress...</h2>
             <p style='color: #ecf0f1; margin: 10px 0 0 0;'>
@@ -4168,29 +4170,29 @@ def run_analysis(ref_path, test_path, ref, test, settings, output_widget):
         </div>
         """
         display(HTMLWidget(value=progress_html))
-        
+
         # Run pipeline
         try:
             pdf_file = run_pipeline_and_build_pdf(ref_path, test_path, ref, test, settings)
-            
+
             # Generate Analysis Settings Technical Report
             tech_pdf_file = generate_analysis_settings_report(ref_path, test_path, ref, test, settings)
-            
+
             # Clear and show download buttons
             output_widget.clear_output(wait=True)
-            
+
             # Encode main report
             with open(pdf_file, "rb") as f:
                 b64_main = base64.b64encode(f.read()).decode("utf-8")
             download_name_main = os.path.basename(pdf_file)
-            
+
             # Encode technical report
             with open(tech_pdf_file, "rb") as f:
                 b64_tech = base64.b64encode(f.read()).decode("utf-8")
             download_name_tech = os.path.basename(tech_pdf_file)
-            
+
             success_html = f"""
-            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%); 
+            <div style='background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);
                         padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0;
                         box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
                 <h2 style='color: white; margin: 0; font-size: 28px;'>✅ Analysis Complete!</h2>
@@ -4200,8 +4202,8 @@ def run_analysis(ref_path, test_path, ref, test, settings, output_widget):
                 <div style='margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;'>
                     <a download="{download_name_main}"
                        href="data:application/pdf;base64,{b64_main}"
-                       style="background: white; color: #27AE60; padding: 15px 35px; 
-                              border-radius: 25px; text-decoration: none; 
+                       style="background: white; color: #27AE60; padding: 15px 35px;
+                              border-radius: 25px; text-decoration: none;
                               font-family: Arial, sans-serif; font-size: 18px; font-weight: bold;
                               display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                               transition: transform 0.2s;">
@@ -4209,8 +4211,8 @@ def run_analysis(ref_path, test_path, ref, test, settings, output_widget):
                     </a>
                     <a download="{download_name_tech}"
                        href="data:application/pdf;base64,{b64_tech}"
-                       style="background: white; color: #F39C12; padding: 15px 35px; 
-                              border-radius: 25px; text-decoration: none; 
+                       style="background: white; color: #F39C12; padding: 15px 35px;
+                              border-radius: 25px; text-decoration: none;
                               font-family: Arial, sans-serif; font-size: 16px; font-weight: bold;
                               display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                               transition: transform 0.2s;">
@@ -4224,16 +4226,16 @@ def run_analysis(ref_path, test_path, ref, test, settings, output_widget):
             </div>
             """
             display(HTML(success_html))
-            
+
         except Exception as e:
             output_widget.clear_output(wait=True)
             error_html = f"""
-            <div style='background: #E74C3C; padding: 20px; border-radius: 10px; 
+            <div style='background: #E74C3C; padding: 20px; border-radius: 10px;
                         text-align: center; margin: 20px 0;'>
                 <h2 style='color: white; margin: 0;'>❌ Error</h2>
                 <p style='color: white; margin: 10px 0;'>
                     An error occurred during processing:<br/>
-                    <code style='background: rgba(0,0,0,0.2); padding: 5px 10px; 
+                    <code style='background: rgba(0,0,0,0.2); padding: 5px 10px;
                                  border-radius: 5px; display: inline-block; margin-top: 10px;'>
                         {str(e)}
                     </code>
@@ -4262,13 +4264,16 @@ main()
 </footer>
 
 <script>
-  const fullCode = `# Long Python code content here...
+  const fullCode = `# Full Python Code
 import cv2
 import numpy as np
-# your full project code lines...
-# ...
-# end of code
-`;
+
+def analyze_color(reference, sample):
+    ref = cv2.imread(reference)
+    smp = cv2.imread(sample)
+    diff = cv2.absdiff(ref, smp)
+    return np.mean(diff)
+# End of code`;
 
   function copyCode() {
     navigator.clipboard.writeText(fullCode);
