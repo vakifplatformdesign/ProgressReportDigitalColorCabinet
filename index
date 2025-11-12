@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Color Cabinet Project – Abdelbary Algamel</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #f8faff, #e7eef8);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    max-width: 900px;
+    margin: 40px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  img.logo {
+    width: 120px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+    margin: 10px 0;
+    color: #003366;
+  }
+
+  p {
+    color: #333;
+    line-height: 1.5;
+    margin: 5px 0;
+  }
+
+  .info {
+    margin-bottom: 30px;
+  }
+
+  .code-box {
+    position: relative;
+    text-align: left;
+    background-color: #0e1111;
+    color: #e6e6e6;
+    border-radius: 12px;
+    padding: 20px;
+    font-family: "Consolas", monospace;
+    overflow: hidden;
+    max-height: 220px;
+    transition: max-height 0.4s ease;
+  }
+
+  .code-box.expanded {
+    max-height: 1000px;
+    overflow-y: auto;
+  }
+
+  .buttons {
+    margin-top: 20px;
+  }
+
+  button {
+    background: #003366;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    margin: 6px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background: #0055aa;
+  }
+
+  footer {
+    margin-top: 30px;
+    color: #666;
+    font-size: 0.8em;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <img src="images.png" alt="Pamukkale University Logo" class="logo">
+  <h1>Pamukkale University</h1>
+  <p><strong>Institute of Science</strong></p>
+  <p><strong>Department of Electrical and Electronics Engineering</strong></p>
+  <div class="info">
+    <p><strong>Student:</strong> Abdelbary Algamel</p>
+    <p><strong>Supervisor:</strong> Dr. Adem Ukte</p>
+    <p><strong>Date:</strong> November 2025</p>
+    <p><strong>Title:</strong> Design of a Digital Color Cabinet for Color and Pattern Analysis in the Textile Industry</p>
+  </div>
+
+  <div class="code-box" id="codeBox">
+<pre><code>
+# Python Example (preview)
+import cv2, numpy as np
+
+def analyze_color(reference, sample):
+    ref = cv2.imread(reference)
+    smp = cv2.imread(sample)
+    diff = cv2.absdiff(ref, smp)
+    return np.mean(diff)
+</code></pre>
+  </div>
+
+  <div class="buttons">
+    <button onclick="copyCode()">Copy Full Code</button>
+    <button onclick="toggleCode()">Show Full Code</button>
+  </div>
+</div>
+
+<footer>
+  © 2025 Abdelbary Algamel – Pamukkale University, Denizli
+</footer>
+
+<script>
+  const fullCode = `# Long Python code content here...
+import cv2
+import numpy as np
+# your full project code lines...
+# ...
+# end of code
+`;
+
+  function copyCode() {
+    navigator.clipboard.writeText(fullCode);
+    alert("Full code copied to clipboard!");
+  }
+
+  function toggleCode() {
+    const box = document.getElementById("codeBox");
+    box.classList.toggle("expanded");
+  }
+</script>
+
+</body>
+</html>
